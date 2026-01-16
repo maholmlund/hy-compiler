@@ -73,3 +73,46 @@ def test_punctuation() -> None:
         Token(L, "punctuation", ","),
         Token(L, "punctuation", ";"),
     ]
+
+
+sample7 = """
+if /*kdflkjl
+
+*/ if # /*
+2"""
+
+
+def test_multiline_comment() -> None:
+    assert tokenize(sample7) == [
+        Token(L, "identifier", "if"),
+        Token(L, "identifier", "if"),
+        Token(L, "int_literal", "2"),
+    ]
+
+
+sample8 = """
+if 2 ( #soo
+##)
+) while while /*kjdk*/ while
+;if,, 8, /*
+while
+*/
+"""
+
+
+def test_all() -> None:
+    assert tokenize(sample8) == [
+        Token(Loc(1, 0), "identifier", "if"),
+        Token(Loc(1, 3), "int_literal", "2"),
+        Token(Loc(1, 5), "punctuation", "("),
+        Token(Loc(3, 0), "punctuation", ")"),
+        Token(Loc(3, 2), "identifier", "while"),
+        Token(Loc(3, 8), "identifier", "while"),
+        Token(Loc(3, 23), "identifier", "while"),
+        Token(Loc(4, 0), "punctuation", ";"),
+        Token(Loc(4, 1), "identifier", "if"),
+        Token(Loc(4, 3), "punctuation", ","),
+        Token(Loc(4, 4), "punctuation", ","),
+        Token(Loc(4, 6), "int_literal", "8"),
+        Token(Loc(4, 7), "punctuation", ","),
+    ]
