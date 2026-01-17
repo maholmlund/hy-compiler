@@ -13,6 +13,9 @@ class Loc:
             return True
         return self.line == value.line and self.column == value.column
 
+    def __str__(self) -> str:
+        return f"line {self.line}, column {self.column}"
+
 
 # Dummy location, is always equal to another location. Useful in tests.
 L = Loc(1, 1)
