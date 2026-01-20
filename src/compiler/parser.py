@@ -1,6 +1,16 @@
 from compiler.tokenizer import Token
 from compiler.ast import *
 
+# Left associative operator precedences
+la_operators = [
+    ["or"],
+    ["and"],
+    ["==", "!="],
+    ["<", ">", "<=", ">="],
+    ["+", "-"],
+    ["/", "*", "%"],
+]
+
 
 def parse(tokens: list[Token]) -> Expression:
 
@@ -54,32 +64,45 @@ def parse(tokens: list[Token]) -> Expression:
 
     def parse_term() -> Expression:
         value = peek()
+        result = None
+        unary = None
+        if value.text in ["-", "not"]:
+            unary = value.text
+            consume()
         if value.type == "identifier":
-            return parse_identifier_or_function()
+            result = parse_identifier_or_function()
         elif value.type == "int_literal":
-            return parse_int_literal()
+            result = parse_int_literal()
         elif value.text == "(":
-            return parse_parenthesized()
+            result = parse_parenthesized()
         elif value.text == "if":
-            return parse_if_then_else()
+            result = parse_if_then_else()
+        elif value.text in ["-", "not"]:
+            result = parse_term()
         else:
             raise Exception(f"{value.loc}: expected term")
+        if not unary:
+            return result
+        return UnaryOp(unary, result)
 
-    def parse_sum() -> Expression:
-        left = parse_divmult()
-        while peek().text in ['+', '-']:
-            operator_token = consume(['+', '-'])
-            right = parse_divmult()
+    def parse_la_operator(level: int) -> Expression:
+        if level == len(la_operators):
+            return parse_term()
+        left = parse_la_operator(level + 1)
+        while peek().text in la_operators[level]:
+            operator_token = consume(
+                la_operators[level])
+            right = parse_la_operator(level + 1)
             left = BinaryOp(left, operator_token.text, right)
         return left
 
-    def parse_divmult() -> Expression:
-        left = parse_term()
-        while peek().text in ['*', '/']:
-            operator_token = consume(['*', '/'])
-            right = parse_term()
-            left = BinaryOp(left, operator_token.text, right)
-        return left
+    def parse_assignment_operator() -> Expression:
+        left = parse_la_operator(0)
+        if peek().text != "=":
+            return left
+        consume("=")
+        right = parse_assignment_operator()
+        return BinaryOp(left, "=", right)
 
     def parse_parenthesized() -> Expression:
         consume('(')
@@ -99,7 +122,7 @@ def parse(tokens: list[Token]) -> Expression:
         return IfBlock(condition, then, eelse)
 
     def parse_expression() -> Expression:
-        return parse_sum()
+        return parse_assignment_operator()
 
     if not tokens:
         return Expression()

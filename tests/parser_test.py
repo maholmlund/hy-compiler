@@ -53,6 +53,31 @@ def test_precedence() -> None:
                                      BinaryOp(Literal(2), '*', Literal(3)))
 
 
+def test_assignment_precedence() -> None:
+    tokens = [
+        Token(L, "int_literal", "1"),
+        Token(L, "operator", "+"),
+        Token(L, "int_literal", "2"),
+        Token(L, "operator", "*"),
+        Token(L, "int_literal", "3"),
+        Token(L, "operator", "="),
+        Token(L, "int_literal", "4"),
+    ]
+    assert parse(tokens) == BinaryOp(
+        BinaryOp(
+            Literal(1),
+            "+",
+            BinaryOp(
+                Literal(2),
+                "*",
+                Literal(3)
+            ),
+        ),
+        "=",
+        Literal(4)
+    )
+
+
 def test_parenthesis() -> None:
     tokens = [
         Token(L, "punctuation", "("),
@@ -107,6 +132,17 @@ def test_complex_math() -> None:
             Literal(2)
         )
     )
+
+
+def test_unary_operator_chaining() -> None:
+    tokens = [
+        Token(L, "operator", "-"),
+        Token(L, "operator", "-"),
+        Token(L, "operator", "not"),
+        Token(L, "int_literal", "4"),
+    ]
+    assert parse(tokens) == UnaryOp(
+        "-", UnaryOp("-", UnaryOp("not", Literal(4))))
 
 
 def test_unmatched_parenthesis() -> None:

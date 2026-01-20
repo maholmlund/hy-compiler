@@ -24,6 +24,12 @@ class BinaryOp(Expression):
 
 
 @dataclass
+class UnaryOp(Expression):
+    op: str
+    target: Expression
+
+
+@dataclass
 class IfBlock(Expression):
     condition: Expression
     then: Expression
