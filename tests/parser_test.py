@@ -38,7 +38,7 @@ def test_plusminus_invalid_syntax() -> None:
     ]
     with pytest.raises(Exception) as exinfo:
         parse(tokens)
-    assert "identifier or int" in str(exinfo)
+    assert "term" in str(exinfo)
 
 
 def test_precedence() -> None:
@@ -149,14 +149,14 @@ def test_missing_identifier() -> None:
     ]
     with pytest.raises(Exception) as exinfo:
         parse(tokens)
-    assert "identifier" in str(exinfo)
+    assert "term" in str(exinfo)
 
 
 def test_if() -> None:
     tokens = [
-        Token(L, "identifier", "if"),
+        Token(L, "keyword", "if"),
         Token(L, "int_literal", "1"),
-        Token(L, "identifier", "then"),
+        Token(L, "keyword", "then"),
         Token(L, "int_literal", "2"),
     ]
     assert parse(tokens) == IfBlock(Literal(1), Literal(2), None)
@@ -164,11 +164,11 @@ def test_if() -> None:
 
 def test_if_else() -> None:
     tokens = [
-        Token(L, "identifier", "if"),
+        Token(L, "keyword", "if"),
         Token(L, "int_literal", "1"),
-        Token(L, "identifier", "then"),
+        Token(L, "keyword", "then"),
         Token(L, "int_literal", "2"),
-        Token(L, "identifier", "else"),
+        Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == IfBlock(Literal(1), Literal(2), Literal(3))
@@ -178,11 +178,11 @@ def test_if_as_part_of_expression() -> None:
     tokens = [
         Token(L, "int_literal", "0"),
         Token(L, "operator", "+"),
-        Token(L, "identifier", "if"),
+        Token(L, "keyword", "if"),
         Token(L, "int_literal", "1"),
-        Token(L, "identifier", "then"),
+        Token(L, "keyword", "then"),
         Token(L, "int_literal", "2"),
-        Token(L, "identifier", "else"),
+        Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == BinaryOp(Literal(0), '+',

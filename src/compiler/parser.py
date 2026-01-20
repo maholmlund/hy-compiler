@@ -3,6 +3,7 @@ from compiler.ast import *
 
 
 def parse(tokens: list[Token]) -> Expression:
+
     pos = 0
 
     def peek() -> Token:
@@ -47,14 +48,16 @@ def parse(tokens: list[Token]) -> Expression:
             return parse_int_literal()
         elif value.text == "(":
             return parse_parenthesized()
+        elif value.text == "if":
+            return parse_if_then_else()
         else:
-            raise Exception(f"{value.loc}: expected identifier or int literal")
+            raise Exception(f"{value.loc}: expected term")
 
     def parse_sum() -> Expression:
         left = parse_divmult()
         while peek().text in ['+', '-']:
             operator_token = consume(['+', '-'])
-            right = parse_expression()
+            right = parse_divmult()
             left = BinaryOp(left, operator_token.text, right)
         return left
 
@@ -84,9 +87,6 @@ def parse(tokens: list[Token]) -> Expression:
         return IfBlock(condition, then, eelse)
 
     def parse_expression() -> Expression:
-        value = peek()
-        if value.text == "if":
-            return parse_if_then_else()
         return parse_sum()
 
     if not tokens:

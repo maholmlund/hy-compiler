@@ -28,6 +28,8 @@ regexes = [
     ("punctuation", r'[(){},;]'),
 ]
 
+keywords = ["if", "then", "else", "while"]
+
 
 def tokenize(source_code: str) -> list[Token]:
     result: list[Token] = []
@@ -51,6 +53,13 @@ def tokenize(source_code: str) -> list[Token]:
                 last_index = match.group().rfind('\n')
                 if last_index != -1:
                     line_start = match.start() + last_index
+            case "identifier":
+                if match.group() in keywords:
+                    match_type = "keyword"
+                result.append(Token(
+                    Loc(line, match.start() - line_start),
+                    match_type,
+                    match.group()))
             case _:
                 result.append(Token(
                     Loc(line, match.start() - line_start),
