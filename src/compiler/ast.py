@@ -28,3 +28,9 @@ class IfBlock(Expression):
     condition: Expression
     then: Expression
     eelse: Expression | None
+
+
+@dataclass
+class FunctionCall(Expression):
+    name: str
+    args: list[Expression]

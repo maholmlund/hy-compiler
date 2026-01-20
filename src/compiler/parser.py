@@ -34,16 +34,28 @@ def parse(tokens: list[Token]) -> Expression:
             raise Exception(f"{value.loc}: expected int literal")
         return Literal(int(value.text))
 
-    def parse_identifier() -> Identifier:
+    def parse_arg_list() -> list[Expression]:
+        result = [parse_expression()]
+        while peek().text == ",":
+            consume(",")
+            result.append(parse_expression())
+        return result
+
+    def parse_identifier_or_function() -> Expression:
         value = consume()
         if value.type != "identifier":
             raise Exception(f"{value.loc}: expected identifier")
-        return Identifier(value.text)
+        if peek().text != "(":
+            return Identifier(value.text)
+        consume("(")
+        args = parse_arg_list()
+        consume(")")
+        return FunctionCall(value.text, args)
 
     def parse_term() -> Expression:
         value = peek()
         if value.type == "identifier":
-            return parse_identifier()
+            return parse_identifier_or_function()
         elif value.type == "int_literal":
             return parse_int_literal()
         elif value.text == "(":

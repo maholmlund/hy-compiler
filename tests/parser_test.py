@@ -187,3 +187,82 @@ def test_if_as_part_of_expression() -> None:
     ]
     assert parse(tokens) == BinaryOp(Literal(0), '+',
                                      IfBlock(Literal(1), Literal(2), Literal(3)))
+
+
+def test_nested_if() -> None:
+    tokens = [
+        Token(L, "keyword", "if"),
+        Token(L, "int_literal", "1"),
+        Token(L, "keyword", "then"),
+        Token(L, "punctuation", "("),
+        Token(L, "keyword", "if"),
+        Token(L, "int_literal", "1"),
+        Token(L, "keyword", "then"),
+        Token(L, "int_literal", "2"),
+        Token(L, "punctuation", ")"),
+        Token(L, "keyword", "else"),
+        Token(L, "int_literal", "3"),
+    ]
+    assert parse(tokens) == IfBlock(Literal(1), IfBlock(
+        Literal(1), Literal(2), None), Literal(3))
+
+
+def test_function() -> None:
+    tokens = [
+        Token(L, "identifier", "foo"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ","),
+        Token(L, "int_literal", "2"),
+        Token(L, "punctuation", ")"),
+    ]
+    assert parse(tokens) == FunctionCall("foo", [Literal(1), Literal(2)])
+
+
+def test_nested_functions() -> None:
+    tokens = [
+        Token(L, "identifier", "foo"),
+        Token(L, "punctuation", "("),
+        Token(L, "identifier", "bar"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "3"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", ","),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ","),
+        Token(L, "int_literal", "2"),
+        Token(L, "punctuation", ","),
+        Token(L, "identifier", "bar"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "4"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", ")"),
+    ]
+    assert parse(tokens) == FunctionCall(
+        "foo",
+        [
+            FunctionCall(
+                "bar",
+                [Literal(3)]
+            ),
+            Literal(1),
+            Literal(2),
+            FunctionCall(
+                "bar",
+                [Literal(4)]
+            )
+        ]
+    )
+
+
+def test_missing_argument() -> None:
+    tokens = [
+        Token(L, "identifier", "foo"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ","),
+        Token(L, "punctuation", ")"),
+    ]
+    with pytest.raises(Exception) as exinfo:
+        parse(tokens)
+    assert "term" in str(exinfo)
