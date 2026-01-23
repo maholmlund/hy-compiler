@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from compiler.location import Loc
 
 
 @dataclass
 class Expression:
+    loc: Loc | None
     pass
 
 

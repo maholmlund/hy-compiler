@@ -53,7 +53,7 @@ def parse(tokens: list[Token]) -> Expression:
         value = consume()
         if value.type != "int_literal":
             raise Exception(f"{value.loc}: expected int literal")
-        return Literal(int(value.text))
+        return Literal(value.loc, int(value.text))
 
     def parse_arg_list() -> list[Expression]:
         result = [parse_expression()]
@@ -67,11 +67,11 @@ def parse(tokens: list[Token]) -> Expression:
         if value.type != "identifier":
             raise Exception(f"{value.loc}: expected identifier")
         if peek().text != "(":
-            return Identifier(value.text)
+            return Identifier(value.loc, value.text)
         consume("(")
         args = parse_arg_list()
         consume(")")
-        return FunctionCall(value.text, args)
+        return FunctionCall(value.loc, value.text, args)
 
     def parse_term() -> Expression:
         value = peek()
@@ -96,7 +96,7 @@ def parse(tokens: list[Token]) -> Expression:
             raise Exception(f"{value.loc}: expected term")
         if not unary:
             return result
-        return UnaryOp(unary, result)
+        return UnaryOp(value.loc, unary, result)
 
     def parse_la_operator(level: int) -> Expression:
         if level == len(la_operators):
@@ -106,16 +106,17 @@ def parse(tokens: list[Token]) -> Expression:
             operator_token = consume(
                 la_operators[level])
             right = parse_la_operator(level + 1)
-            left = BinaryOp(left, operator_token.text, right)
+            left = BinaryOp(operator_token.loc, left,
+                            operator_token.text, right)
         return left
 
     def parse_assignment_operator() -> Expression:
         left = parse_la_operator(0)
         if peek().text != "=":
             return left
-        consume("=")
+        l = consume("=").loc
         right = parse_assignment_operator()
-        return BinaryOp(left, "=", right)
+        return BinaryOp(l, left, "=", right)
 
     def parse_parenthesized() -> Expression:
         consume('(')
@@ -125,7 +126,7 @@ def parse(tokens: list[Token]) -> Expression:
 
     def parse_block() -> Block:
         expressions: list[Expression] = []
-        consume("{")
+        l = consume("{").loc
         return_last = False
         while peek().text != "}":
             if peek().text == "var":
@@ -140,26 +141,26 @@ def parse(tokens: list[Token]) -> Expression:
                 consume(";")  # a semicolon is optional after }
         consume("}")
         if not return_last:
-            expressions.append(Expression())
-        return Block(expressions)
+            expressions.append(Expression(l))
+        return Block(l, expressions)
 
     def parse_if_then_else() -> IfBlock:
-        consume('if')
+        l = consume('if').loc
         condition = parse_expression()
         consume('then')
         then = parse_expression()
         if peek().text != "else":
-            return IfBlock(condition, then, None)
+            return IfBlock(l, condition, then, None)
         consume("else")
         eelse = parse_expression()
-        return IfBlock(condition, then, eelse)
+        return IfBlock(l, condition, then, eelse)
 
     def parse_variable_declaration() -> VarDeclaration:
-        consume("var")
+        l = consume("var").loc
         name = consume().text
         consume("=")
         value = parse_expression()
-        return VarDeclaration(name, value)
+        return VarDeclaration(l, name, value)
 
     def parse_expression() -> Expression:
         if peek().text == "{":
@@ -167,7 +168,7 @@ def parse(tokens: list[Token]) -> Expression:
         return parse_assignment_operator()
 
     if not tokens:
-        return Expression()
+        return Expression(Loc(1, 1))
     tokens.append(Token(L, "punctuation", "}"))
     tokens.insert(0, Token(L, "punctuation", "{"))
     result = parse_expression()
