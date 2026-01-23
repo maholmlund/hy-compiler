@@ -407,3 +407,112 @@ def test_var_not_allowed() -> None:
     with pytest.raises(Exception) as exinfo:
         parse(tokens)
     assert "term" in str(exinfo)
+
+
+def test_optional_semicolon_valid() -> None:
+    lists = [
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", "}"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "keyword", "if"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "then"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "keyword", "if"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "then"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "punctuation", ";"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "keyword", "if"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "then"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", ";"),
+            Token(L, "identifier", "c"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "keyword", "if"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "then"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "keyword", "else"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", "}"),
+            Token(L, "identifier", "c"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "identifier", "x"),
+            Token(L, "operator", "="),
+            Token(L, "punctuation", "{"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "f"),
+            Token(L, "punctuation", "("),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", ")"),
+            Token(L, "punctuation", "}"),
+            Token(L, "punctuation", "{"),
+            Token(L, "punctuation", "}"),
+            Token(L, "punctuation", "}"),
+        ]
+    ]
+    for tokens in lists:
+        parse(tokens)  # should not raise exception
+
+
+def test_optional_semicolon_invalid() -> None:
+    lists = [
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "identifier", "b"),
+            Token(L, "punctuation", "}"),
+        ],
+        [
+            Token(L, "punctuation", "{"),
+            Token(L, "keyword", "if"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "then"),
+            Token(L, "punctuation", "{"),
+            Token(L, "identifier", "a"),
+            Token(L, "punctuation", "}"),
+            Token(L, "identifier", "b"),
+            Token(L, "identifier", "c"),
+            Token(L, "punctuation", "}"),
+        ],
+    ]
+    for tokens in lists:
+        with pytest.raises(Exception) as exinfo:
+            parse(tokens)
+        assert ";" in str(exinfo)

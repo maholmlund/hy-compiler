@@ -39,6 +39,16 @@ def parse(tokens: list[Token]) -> Expression:
         pos += 1
         return token
 
+    def semicolon_needed_after(e: Expression) -> bool:
+        if type(e) == Block:
+            return False
+        if type(e) == IfBlock:
+            if type(e.eelse) == Block:
+                return False
+            if e.eelse is None and type(e.then) == Block:
+                return False
+        return True
+
     def parse_int_literal() -> Literal:
         value = consume()
         if value.type != "int_literal":
@@ -119,13 +129,15 @@ def parse(tokens: list[Token]) -> Expression:
         return_last = False
         while peek().text != "}":
             if peek().text == "var":
+                # var only allowed directly inside blocks
                 expressions.append(parse_variable_declaration())
             else:
                 expressions.append(parse_expression())
             if peek().text == "}":
                 return_last = True
                 break
-            consume(";")
+            if semicolon_needed_after(expressions[-1]) or peek().text == ";":
+                consume(";")  # a semicolon is optional after }
         consume("}")
         if not return_last:
             expressions.append(Expression())
