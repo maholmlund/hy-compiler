@@ -1,4 +1,5 @@
 from compiler.tokenizer import Token
+from compiler.location import L
 from compiler.ast import *
 
 # Left associative operator precedences
@@ -75,6 +76,8 @@ def parse(tokens: list[Token]) -> Expression:
             result = parse_int_literal()
         elif value.text == "(":
             result = parse_parenthesized()
+        elif value.text == "{":
+            result = parse_block()
         elif value.text == "if":
             result = parse_if_then_else()
         elif value.text in ["-", "not"]:
@@ -110,6 +113,21 @@ def parse(tokens: list[Token]) -> Expression:
         consume(')')
         return result
 
+    def parse_block() -> Block:
+        expressions = []
+        consume("{")
+        return_last = False
+        while peek().text != "}":
+            expressions.append(parse_expression())
+            if peek().text == "}":
+                return_last = True
+                break
+            consume(";")
+        consume("}")
+        if not return_last:
+            expressions.append(Expression())
+        return Block(expressions)
+
     def parse_if_then_else() -> IfBlock:
         consume('if')
         condition = parse_expression()
@@ -122,10 +140,14 @@ def parse(tokens: list[Token]) -> Expression:
         return IfBlock(condition, then, eelse)
 
     def parse_expression() -> Expression:
+        if peek().text == "{":
+            return parse_block()
         return parse_assignment_operator()
 
     if not tokens:
         return Expression()
+    tokens.append(Token(L, "punctuation", "}"))
+    tokens.insert(0, Token(L, "punctuation", "{"))
     result = parse_expression()
     if pos != len(tokens):
         raise Exception("expected EOF")

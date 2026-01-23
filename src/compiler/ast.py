@@ -40,3 +40,8 @@ class IfBlock(Expression):
 class FunctionCall(Expression):
     name: str
     args: list[Expression]
+
+
+@dataclass
+class Block(Expression):
+    expressions: list[Expression]
