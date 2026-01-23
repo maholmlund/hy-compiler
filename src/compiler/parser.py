@@ -114,11 +114,14 @@ def parse(tokens: list[Token]) -> Expression:
         return result
 
     def parse_block() -> Block:
-        expressions = []
+        expressions: list[Expression] = []
         consume("{")
         return_last = False
         while peek().text != "}":
-            expressions.append(parse_expression())
+            if peek().text == "var":
+                expressions.append(parse_variable_declaration())
+            else:
+                expressions.append(parse_expression())
             if peek().text == "}":
                 return_last = True
                 break
@@ -138,6 +141,13 @@ def parse(tokens: list[Token]) -> Expression:
         consume("else")
         eelse = parse_expression()
         return IfBlock(condition, then, eelse)
+
+    def parse_variable_declaration() -> VarDeclaration:
+        consume("var")
+        name = consume().text
+        consume("=")
+        value = parse_expression()
+        return VarDeclaration(name, value)
 
     def parse_expression() -> Expression:
         if peek().text == "{":

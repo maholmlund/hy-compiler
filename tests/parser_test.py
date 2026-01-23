@@ -380,3 +380,30 @@ def test_more_complex_block() -> None:
             Block([Expression()])
         ])
     ])
+
+
+def test_var_declaration() -> None:
+    tokens = [
+        Token(L, "keyword", "var"),
+        Token(L, "identifier", "a"),
+        Token(L, "operator", "="),
+        Token(L, "int_literal", "1"),
+    ]
+    assert parse(tokens) == Block([
+        VarDeclaration("a", Literal(1))
+    ])
+
+
+def test_var_not_allowed() -> None:
+    tokens = [
+        Token(L, "keyword", "if"),
+        Token(L, "keyword", "var"),
+        Token(L, "identifier", "a"),
+        Token(L, "operator", "="),
+        Token(L, "int_literal", "1"),
+        Token(L, "keyword", "then"),
+        Token(L, "int_literal", "2"),
+    ]
+    with pytest.raises(Exception) as exinfo:
+        parse(tokens)
+    assert "term" in str(exinfo)

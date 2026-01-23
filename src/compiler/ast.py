@@ -45,3 +45,9 @@ class FunctionCall(Expression):
 @dataclass
 class Block(Expression):
     expressions: list[Expression]
+
+
+@dataclass
+class VarDeclaration(Expression):
+    name: str
+    value: Expression
