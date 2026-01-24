@@ -234,7 +234,7 @@ def test_if_as_part_of_expression() -> None:
 def test_nested_if() -> None:
     tokens = [
         Token(L, "keyword", "if"),
-        Token(L, "int_literal", "1"),
+        Token(L, "bool_literal", "false"),
         Token(L, "keyword", "then"),
         Token(L, "punctuation", "("),
         Token(L, "keyword", "if"),
@@ -245,8 +245,8 @@ def test_nested_if() -> None:
         Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L, [IfBlock(L, Literal(L, 1), IfBlock(L,
-                                                                        Literal(L, 1), Literal(L, 2), None), Literal(L, 3))])
+    assert parse(tokens) == Block(L, [IfBlock(L, Literal(L, False), IfBlock(L,
+                                                                            Literal(L, 1), Literal(L, 2), None), Literal(L, 3))])
 
 
 def test_function() -> None:

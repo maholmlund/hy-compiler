@@ -49,11 +49,14 @@ def parse(tokens: list[Token]) -> Expression:
                 return False
         return True
 
-    def parse_int_literal() -> Literal:
+    def parse_literal() -> Literal:
         value = consume()
-        if value.type != "int_literal":
-            raise Exception(f"{value.loc}: expected int literal")
-        return Literal(value.loc, int(value.text))
+        if value.type == "int_literal":
+            return Literal(value.loc, int(value.text))
+        elif value.type == "bool_literal":
+            return Literal(value.loc, value.text == "true")
+        else:
+            raise Exception(f"{value.loc}: expected literal")
 
     def parse_arg_list() -> list[Expression]:
         result = [parse_expression()]
@@ -82,8 +85,8 @@ def parse(tokens: list[Token]) -> Expression:
             consume()
         if value.type == "identifier":
             result = parse_identifier_or_function()
-        elif value.type == "int_literal":
-            result = parse_int_literal()
+        elif value.type == "int_literal" or value.type == "bool_literal":
+            result = parse_literal()
         elif value.text == "(":
             result = parse_parenthesized()
         elif value.text == "{":

@@ -22,6 +22,7 @@ regexes = [
     ("multiline_comment", r'/\*[\s\S]*?\*/'),
     ("whitespace", r' +'),
     ("int_literal", r'[0-9]+'),
+    ("bool_literal", r'(true|false)'),
     ("identifier", r'[a-z_]+[a-z_1-9]*'),
     ("operator", r'((==|<=|>=|!=)|(\+|-|\*|/|<|>|=|%))'),
     ("newline", r'\n'),
