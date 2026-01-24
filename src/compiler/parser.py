@@ -93,6 +93,8 @@ def parse(tokens: list[Token]) -> Expression:
             result = parse_block()
         elif value.text == "if":
             result = parse_if_then_else()
+        elif value.text == "while":
+            result = parse_while()
         elif value.text in ["-", "not"]:
             result = parse_term()
         else:
@@ -157,6 +159,13 @@ def parse(tokens: list[Token]) -> Expression:
         consume("else")
         eelse = parse_expression()
         return IfBlock(l, condition, then, eelse)
+
+    def parse_while() -> While:
+        l = consume("while").loc
+        condition = parse_expression()
+        consume("do")
+        action = parse_expression()
+        return While(l, condition, action)
 
     def parse_variable_declaration() -> VarDeclaration:
         l = consume("var").loc

@@ -523,3 +523,51 @@ def test_optional_semicolon_invalid() -> None:
         with pytest.raises(Exception) as exinfo:
             parse(tokens)
         assert ";" in str(exinfo)
+
+
+def test_while() -> None:
+    tokens = [
+        Token(L, "keyword", "while"),
+        Token(L, "bool_literal", "true"),
+        Token(L, "keyword", "do"),
+        Token(L, "identifier", "f"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", ";"),
+    ]
+    assert parse(tokens) == Block(L, [
+        While(L, Literal(L, True), FunctionCall(L, "f", [Literal(L, 1)])),
+        Expression(L)
+    ])
+
+
+def test_while_complex() -> None:
+    tokens = [
+        Token(L, "keyword", "while"),
+        Token(L, "punctuation", "{"),
+        Token(L, "identifier", "f"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", "}"),
+        Token(L, "keyword", "do"),
+        Token(L, "punctuation", "{"),
+        Token(L, "identifier", "f"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", ";"),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", "}"),
+    ]
+    assert parse(tokens) == Block(L, [
+        While(L,
+              Block(L, [FunctionCall(L, "f", [
+                  Literal(L, 1)
+              ])]),
+              Block(L, [
+                  FunctionCall(L, "f", [Literal(L, 1)]),
+                  Literal(L, 1)
+              ]))
+    ])

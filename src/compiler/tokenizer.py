@@ -29,7 +29,7 @@ regexes = [
     ("punctuation", r'[(){},;]'),
 ]
 
-keywords = ["if", "then", "else", "while", "var"]
+keywords = ["if", "then", "else", "while", "var", "do"]
 
 
 def tokenize(source_code: str) -> list[Token]:

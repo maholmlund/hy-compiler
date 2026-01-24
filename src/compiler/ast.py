@@ -39,6 +39,12 @@ class IfBlock(Expression):
 
 
 @dataclass
+class While(Expression):
+    condition: Expression
+    action: Expression
+
+
+@dataclass
 class FunctionCall(Expression):
     name: str
     args: list[Expression]
