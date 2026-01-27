@@ -4,7 +4,7 @@ from compiler.location import Loc
 
 @dataclass
 class Expression:
-    loc: Loc | None
+    loc: Loc
     pass
 
 

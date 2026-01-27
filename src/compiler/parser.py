@@ -16,6 +16,7 @@ la_operators = [
 def parse(tokens: list[Token]) -> Expression:
 
     pos = 0
+    last_token: Token | None = None
 
     def peek() -> Token:
         if pos < len(tokens):
@@ -29,7 +30,9 @@ def parse(tokens: list[Token]) -> Expression:
 
     def consume(expected: str | list[str] | None = None) -> Token:
         nonlocal pos
+        nonlocal last_token
         token = peek()
+        last_token = token
         if isinstance(expected, str) and token.text != expected:
             raise Exception(f'{token.loc}: expected "{expected}"')
         if isinstance(expected, list) and token.text not in expected:
@@ -40,14 +43,7 @@ def parse(tokens: list[Token]) -> Expression:
         return token
 
     def semicolon_needed_after(e: Expression) -> bool:
-        if type(e) == Block:
-            return False
-        if type(e) == IfBlock:
-            if type(e.eelse) == Block:
-                return False
-            if e.eelse is None and type(e.then) == Block:
-                return False
-        return True
+        return not (last_token is not None and last_token.text == "}")
 
     def parse_literal() -> Literal:
         value = consume()

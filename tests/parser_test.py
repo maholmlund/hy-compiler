@@ -492,7 +492,21 @@ def test_optional_semicolon_valid() -> None:
             Token(L, "punctuation", "{"),
             Token(L, "punctuation", "}"),
             Token(L, "punctuation", "}"),
-        ]
+        ],
+        [
+            # this is cursed
+            Token(L, "keyword", "if"),
+            Token(L, "bool_literal", "true"),
+            Token(L, "keyword", "then"),
+            Token(L, "int_literal", "1"),
+            Token(L, "keyword", "else"),
+            Token(L, "int_literal", "1"),
+            Token(L, "operator", "+"),
+            Token(L, "punctuation", "{"),
+            Token(L, "int_literal", "1"),
+            Token(L, "punctuation", "}"),
+            Token(L, "int_literal", "1"),
+        ],
     ]
     for tokens in lists:
         parse(tokens)  # should not raise exception
