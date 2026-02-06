@@ -92,3 +92,13 @@ while num > 0 do {
 sum
 """
     assert run_code(c) == 100
+
+
+def test_invalid_assignment() -> None:
+    c = """
+var a = 1;
+a + 1 = 1;
+"""
+    with pytest.raises(Exception) as exinfo:
+        run_code(c)
+    assert "identifier" in str(exinfo)
