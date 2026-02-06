@@ -3,11 +3,13 @@ import pytest
 from compiler.tokenizer import tokenize
 from compiler.parser import parse
 from compiler.interpreter import interpret
+from compiler.typechecker import typecheck
 
 
 def run_code(src: str) -> int | bool | None:
     tokens = tokenize(src)
     ast = parse(tokens)
+    typecheck(ast)
     return interpret(ast)
 
 
@@ -101,4 +103,13 @@ a + 1 = 1;
 """
     with pytest.raises(Exception) as exinfo:
         run_code(c)
-    assert "identifier" in str(exinfo)
+    assert "variable" in str(exinfo)
+
+
+def test_multiple_assignments() -> None:
+    c = """
+var a = 4;
+var b = a = 5;
+a
+"""
+    assert run_code(c) == 5

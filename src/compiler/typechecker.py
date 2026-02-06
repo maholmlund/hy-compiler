@@ -7,6 +7,7 @@ class Type:
     pass
 
 
+@dataclass
 class FunType(Type):
     args: list[Type]
     value: Type
@@ -24,13 +25,28 @@ class SymTab:
 
     def find(self, name: str) -> None | Type:
         result = None
-        current = self
+        current: SymTab | None = self
         while current is not None:
             if name in current.symbols:
                 result = current.symbols[name]
                 break
             current = current.parent
         return result
+
+
+global_symbols = {
+    '+': FunType([Int, Int], Int),
+    '-': FunType([Int, Int], Int),
+    '*': FunType([Int, Int], Int),
+    '/': FunType([Int, Int], Int),
+    '%': FunType([Int, Int], Int),
+    'and': FunType([Int, Int], Bool),
+    'or': FunType([Int, Int], Bool),
+    '<=': FunType([Int, Int], Bool),
+    '>=': FunType([Int, Int], Bool),
+    '>': FunType([Int, Int], Bool),
+    '<': FunType([Int, Int], Bool),
+}
 
 
 def typecheck(node: Expression) -> Type:
@@ -41,7 +57,7 @@ def typecheck(node: Expression) -> Type:
 def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
     match node:
         case Literal():
-            if isinstance(node.value, int):
+            if type(node.value) == int:
                 return Int
             return Bool
         case BinaryOp():
@@ -51,10 +67,22 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
                 if left != right:
                     raise Exception(
                         f"{node.loc}: different types, left is {left} and right is {right}")
-                return left
-            if left != Int or right != Int:
-                raise Exception(f"{node.loc}: both sides must be integers")
-            return left
+                return Bool
+            if node.op == "=":
+                right = typecheck_rec(node.right, symtab)
+                if not isinstance(node.left, Identifier):
+                    raise Exception(f"{node.left.loc}: expected variable name")
+                var_type = symtab.find(node.left.name)
+                if var_type is None:
+                    raise Exception(f"{node.left.loc}: unknown variable")
+                return var_type
+            if left != global_symbols[node.op].args[0]:
+                raise Exception(
+                    f"{node.left.loc}: expected {global_symbols[node.op].args[0]}")
+            if right != global_symbols[node.op].args[1]:
+                raise Exception(
+                    f"{node.right.loc}: expected {global_symbols[node.op].args[1]}")
+            return global_symbols[node.op].value
         case UnaryOp():
             target = typecheck_rec(node, symtab)
             if node.op == "-":
@@ -93,7 +121,7 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             return_unit = node.expressions[-1] == None
             last_value = typecheck_rec(node.expressions[0], new_symtab)
             for e in node.expressions[1:]:
-                last_value = typecheck_rec(node.expressions[0], new_symtab)
+                last_value = typecheck_rec(e, new_symtab)
             if return_unit:
                 return Unit
             return last_value
@@ -103,4 +131,10 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
                 raise Exception(f"{node.loc}: unknown function")
             assert (isinstance(return_type, FunType))
             return return_type.value
+        case VarDeclaration():
+            if node.name in symtab.symbols:
+                raise Exception(
+                    f"{node.loc}: redeclaration of a variable in the same scope")
+            symtab.symbols[node.name] = typecheck_rec(node.value, symtab)
+            return Unit
     return Unit
