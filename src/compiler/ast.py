@@ -1,11 +1,55 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from compiler.location import Loc
+
+
+class Type:
+    def __str__(self) -> str:
+        if self == Unit:
+            return "Unit"
+        elif self == Int:
+            return "Int"
+        elif self == Bool:
+            return "Bool"
+        return "woops, something went wrong"
+
+
+@dataclass
+class FunType(Type):
+    args: list[Type]
+    value: Type
+
+
+Unit = Type()
+Int = Type()
+Bool = Type()
 
 
 @dataclass
 class Expression:
     loc: Loc
-    pass
+    type: None | Type = field(default=None, kw_only=True)
+
+    def __str__(self) -> str:
+        match self:
+            case Literal():
+                return f"Literal(type: {self.type}, value: {self.value})"
+            case Identifier():
+                return f"Identifier(type: {self.type}, name: {self.name})"
+            case BinaryOp():
+                return f"BinaryOp(type: {self.type}, left: {self.left}, op: {self.op}, right: {self.right})"
+            case UnaryOp():
+                return f"UnaryOp(type: {self.type}, op: {self.op}, target: {self.target})"
+            case IfBlock():
+                return f"IfBlock(type: {self.type}, condition: {self.condition}, then: {self.then}, else: {self.eelse})"
+            case While():
+                return f"Wile(type: {self.type}, condition: {self.condition}, action: {self.action})"
+            case FunctionCall():
+                return f"FunctionCall(type: {self.type}, name: {self.name}, args: {self.args})"
+            case Block():
+                return f"Block(type: {self.type}, [{', '.join(str(e) for e in self.expressions)}])"
+            case VarDeclaration():
+                return f"VarDeclaration(type: {self.type}, name: {self.name}, value: {self.value})"
+        return ""
 
 
 @dataclass

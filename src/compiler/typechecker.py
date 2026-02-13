@@ -3,21 +3,6 @@ from typing import Self
 from compiler.ast import *
 
 
-class Type:
-    pass
-
-
-@dataclass
-class FunType(Type):
-    args: list[Type]
-    value: Type
-
-
-Unit = Type()
-Int = Type()
-Bool = Type()
-
-
 @dataclass
 class SymTab:
     parent: Self | None
@@ -58,7 +43,9 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
     match node:
         case Literal():
             if type(node.value) == int:
+                node.type = Int
                 return Int
+            node.type = Bool
             return Bool
         case BinaryOp():
             left = typecheck_rec(node.left, symtab)
@@ -67,6 +54,7 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
                 if left != right:
                     raise Exception(
                         f"{node.loc}: different types, left is {left} and right is {right}")
+                node.type = Bool
                 return Bool
             if node.op == "=":
                 right = typecheck_rec(node.right, symtab)
@@ -75,6 +63,7 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
                 var_type = symtab.find(node.left.name)
                 if var_type is None:
                     raise Exception(f"{node.left.loc}: unknown variable")
+                node.type = var_type
                 return var_type
             if left != global_symbols[node.op].args[0]:
                 raise Exception(
@@ -82,22 +71,26 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             if right != global_symbols[node.op].args[1]:
                 raise Exception(
                     f"{node.right.loc}: expected {global_symbols[node.op].args[1]}")
+            node.type = global_symbols[node.op].value
             return global_symbols[node.op].value
         case UnaryOp():
             target = typecheck_rec(node, symtab)
             if node.op == "-":
                 if target != Int:
                     raise Exception(f"{node.loc}: - only allowed for int type")
+                node.type = Int
                 return Int
             elif node.op == "not":
                 if target != Bool:
                     raise Exception(
                         f"{node.loc}: 'not' only allowed for bool type")
+                node.type = Bool
                 return Bool
         case Identifier():
             var_type = symtab.find(node.name)
             if var_type is None:
                 raise Exception(f"{node.loc}: unknown symbol")
+            node.type = var_type
             return var_type
         case IfBlock():
             condition = typecheck_rec(node.condition, symtab)
@@ -105,16 +98,19 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
                 raise Exception(f"{node.loc}: expected bool type")
             then = typecheck_rec(node.then, symtab)
             if node.eelse is None:
+                node.type = then
                 return then
             eelse = typecheck_rec(node.eelse, symtab)
             if then != eelse:
                 raise Exception(
                     f"{node.loc}: mismatching types for if block: then is {then} and else is {eelse}")
+            node.type = then
             return then
         case While():
             condition = typecheck_rec(node.condition, symtab)
             if condition != Bool:
                 raise Exception(f"{node.loc}: expected bool condition")
+            node.type = Unit
             return Unit
         case Block():
             new_symtab = SymTab(symtab, dict())
@@ -123,18 +119,23 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             for e in node.expressions[1:]:
                 last_value = typecheck_rec(e, new_symtab)
             if return_unit:
+                node.type = Unit
                 return Unit
+            node.type = last_value
             return last_value
         case FunctionCall():
             return_type = symtab.find(node.name)
             if return_type is None:
                 raise Exception(f"{node.loc}: unknown function")
             assert (isinstance(return_type, FunType))
+            node.type = return_type.value
             return return_type.value
         case VarDeclaration():
             if node.name in symtab.symbols:
                 raise Exception(
                     f"{node.loc}: redeclaration of a variable in the same scope")
             symtab.symbols[node.name] = typecheck_rec(node.value, symtab)
+            node.type = Unit
             return Unit
+    node.type = Unit
     return Unit
