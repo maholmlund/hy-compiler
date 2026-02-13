@@ -96,16 +96,6 @@ sum
     assert run_code(c) == 100
 
 
-def test_invalid_assignment() -> None:
-    c = """
-var a = 1;
-a + 1 = 1;
-"""
-    with pytest.raises(Exception) as exinfo:
-        run_code(c)
-    assert "variable" in str(exinfo)
-
-
 def test_multiple_assignments() -> None:
     c = """
 var a = 4;

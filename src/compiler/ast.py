@@ -103,3 +103,4 @@ class Block(Expression):
 class VarDeclaration(Expression):
     name: str
     value: Expression
+    var_type: Type | None = None

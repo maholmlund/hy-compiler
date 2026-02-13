@@ -23,13 +23,13 @@ regexes = [
     ("whitespace", r' +'),
     ("int_literal", r'[0-9]+'),
     ("bool_literal", r'(true|false)'),
-    ("identifier", r'[a-z_]+[a-z_1-9]*'),
+    ("identifier", r'[a-z_A-Z]+[a-z_1-9A-Z]*'),
+    ("punctuation", r'([(){},;:]|=>)'),
     ("operator", r'((==|<=|>=|!=)|(\+|-|\*|/|<|>|=|%))'),
     ("newline", r'\n'),
-    ("punctuation", r'[(){},;]'),
 ]
 
-keywords = ["if", "then", "else", "while", "var", "do"]
+keywords = ["if", "then", "else", "while", "var", "do", "Int", "Bool", "Unit"]
 
 
 def tokenize(source_code: str) -> list[Token]:

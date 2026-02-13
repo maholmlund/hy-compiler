@@ -1,3 +1,4 @@
+import pytest
 from compiler.typechecker import typecheck
 from compiler.tokenizer import tokenize
 from compiler.parser import *
@@ -42,3 +43,33 @@ if a > 1 then {
                 None, type=Int),
     ], type=Int)
     assert build_ast(c) == target
+
+
+def test_invalid_assignment() -> None:
+    c = """
+var a = 1;
+a + 1 = 1;
+"""
+    with pytest.raises(Exception) as exinfo:
+        build_ast(c)
+    assert "variable" in str(exinfo)
+
+
+def test_invalid_type() -> None:
+    c = """
+var a: Bool = 1;
+"""
+    with pytest.raises(Exception) as exinfo:
+        build_ast(c)
+    assert "mismatch" in str(exinfo)
+
+
+def test_function_calls() -> None:
+    c = """
+var f: (Int) => Unit = print_int;
+var b = 3;
+b = f(2);
+"""
+    with pytest.raises(Exception) as exinfo:
+        build_ast(c)
+    assert "operands" in str(exinfo)

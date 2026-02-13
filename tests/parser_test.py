@@ -585,3 +585,46 @@ def test_while_complex() -> None:
                   Literal(L, 1)
               ]))
     ])
+
+
+def test_type_parsing() -> None:
+    tokens = [
+        Token(L, "keyword", "var"),
+        Token(L, "identifier", "a"),
+        Token(L, "punctuation", ":"),
+        Token(L, "keyword", "Int"),
+        Token(L, "punctuation", "="),
+        Token(L, "int_literal", "1"),
+        Token(L, "punctuation", ";"),
+        Token(L, "keyword", "var"),
+        Token(L, "identifier", "b"),
+        Token(L, "punctuation", ":"),
+        Token(L, "punctuation", "("),
+        Token(L, "keyword", "Int"),
+        Token(L, "punctuation", ","),
+        Token(L, "keyword", "Bool"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", "=>"),
+        Token(L, "keyword", "Bool"),
+        Token(L, "punctuation", "="),
+        Token(L, "identifier", "print_int"),
+        Token(L, "punctuation", ";"),
+        Token(L, "keyword", "var"),
+        Token(L, "identifier", "c"),
+        Token(L, "punctuation", ":"),
+        Token(L, "punctuation", "("),
+        Token(L, "keyword", "Int"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", "=>"),
+        Token(L, "keyword", "Bool"),
+        Token(L, "punctuation", "="),
+        Token(L, "identifier", "print_int"),
+    ]
+    target = Block(L, [
+        VarDeclaration(L, "a", Literal(L, 1), Int),
+        VarDeclaration(L, "b", Identifier(L, "print_int"),
+                       FunType([Int, Bool], Bool)),
+        VarDeclaration(L, "c", Identifier(
+            L, "print_int"), FunType([Int], Bool)),
+    ])
+    assert str(parse(tokens)) == str(target)

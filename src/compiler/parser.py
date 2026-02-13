@@ -166,9 +166,40 @@ def parse(tokens: list[Token]) -> Expression:
     def parse_variable_declaration() -> VarDeclaration:
         l = consume("var").loc
         name = consume().text
+        var_type = None
+        if peek().text == ":":
+            consume()
+            var_type = parse_type_info()
         consume("=")
         value = parse_expression()
+        if var_type:
+            return VarDeclaration(l, name, value, var_type=var_type)
         return VarDeclaration(l, name, value)
+
+    def parse_type_info() -> Type:
+        first = peek()
+        if first.type == "keyword":
+            return parse_type_keyword()
+        # so it must be a function type
+        consume("(")
+        args = [parse_type_keyword()]
+        while peek().text == ",":
+            consume()
+            args.append(parse_type_keyword())
+        consume(")")
+        consume("=>")
+        ret_val = parse_type_keyword()
+        return FunType(args, ret_val)
+
+    def parse_type_keyword() -> Type:
+        t = consume()
+        if t.text == "Unit":
+            return Unit
+        elif t.text == "Int":
+            return Int
+        elif t.text == "Bool":
+            return Bool
+        raise Exception(f"{t.loc}: expected valid type")
 
     def parse_expression() -> Expression:
         if peek().text == "{":
