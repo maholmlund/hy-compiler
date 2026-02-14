@@ -1,44 +1,11 @@
 from dataclasses import dataclass
 from typing import Self
 from compiler.ast import *
-
-
-@dataclass
-class SymTab:
-    parent: Self | None
-    symbols: dict[str, Type]
-
-    def find(self, name: str) -> None | Type:
-        result = None
-        current: SymTab | None = self
-        while current is not None:
-            if name in current.symbols:
-                result = current.symbols[name]
-                break
-            current = current.parent
-        return result
-
-
-global_symbols: dict[str, Type] = {
-    '+': FunType([Int, Int], Int),
-    '-': FunType([Int, Int], Int),
-    '*': FunType([Int, Int], Int),
-    '/': FunType([Int, Int], Int),
-    '%': FunType([Int, Int], Int),
-    'and': FunType([Int, Int], Bool),
-    'or': FunType([Int, Int], Bool),
-    '<=': FunType([Int, Int], Bool),
-    '>=': FunType([Int, Int], Bool),
-    '>': FunType([Int, Int], Bool),
-    '<': FunType([Int, Int], Bool),
-    'print_int': FunType([Int], Unit),
-    'print_bool': FunType([Bool], Unit),
-    'read_int': FunType([], Int),
-}
+from compiler.symtab import *
 
 
 def typecheck(node: Expression) -> Type:
-    symtab = SymTab(None, global_symbols)
+    symtab = SymTab[Type](None, global_symbols)
     return typecheck_rec(node, symtab)
 
 
