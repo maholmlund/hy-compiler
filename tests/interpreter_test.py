@@ -18,6 +18,16 @@ def test_math() -> None:
     assert run_code(c) == 9
 
 
+def test_negative_nubmer() -> None:
+    c = """-1 + 2"""
+    assert run_code(c) == 1
+
+
+def test_unary_bool() -> None:
+    c = """not false"""
+    assert run_code(c) == True
+
+
 def test_shadowing() -> None:
     c = """
 var a = 6;

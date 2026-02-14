@@ -23,9 +23,9 @@ regexes = [
     ("whitespace", r' +'),
     ("int_literal", r'[0-9]+'),
     ("bool_literal", r'(true|false)'),
-    ("identifier", r'[a-z_A-Z]+[a-z_1-9A-Z]*'),
     ("punctuation", r'([(){},;:]|=>)'),
-    ("operator", r'((==|<=|>=|!=)|(\+|-|\*|/|<|>|=|%))'),
+    ("operator", r'((==|<=|>=|!=)|(\+|-|\*|/|<|>|=|%|not))'),
+    ("identifier", r'[a-z_A-Z]+[a-z_1-9A-Z]*'),
     ("newline", r'\n'),
 ]
 

@@ -79,6 +79,7 @@ def parse(tokens: list[Token]) -> Expression:
         if value.text in ["-", "not"]:
             unary = value.text
             consume()
+            value = peek()
         if value.type == "identifier":
             result = parse_identifier_or_function()
         elif value.type == "int_literal" or value.type == "bool_literal":

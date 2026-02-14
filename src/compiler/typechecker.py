@@ -48,7 +48,7 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             node.type = op_func_type.value
             return op_func_type.value
         case UnaryOp():
-            target = typecheck_rec(node, symtab)
+            target = typecheck_rec(node.target, symtab)
             if node.op == "-":
                 if target != Int:
                     raise Exception(f"{node.loc}: - only allowed for int type")
