@@ -16,10 +16,10 @@ def generate_ir(
         var_counter += 1
         return IRVar(f"V{var_counter}")
 
-    def new_label() -> IRVar:
+    def new_label(loc: Loc) -> Label:
         nonlocal label_counter
         label_counter += 1
-        return IRVar(f"L{label_counter}")
+        return Label(loc, f"L{label_counter}")
 
     ins: list[Instruction] = []
 
@@ -47,6 +47,29 @@ def generate_ir(
             case Identifier():
                 return symtab.require(expr.name)
 
+            case BinaryOp() if expr.op == "=":
+                assert isinstance(expr.left, Identifier)
+                target = symtab.require(expr.left.name)
+                value = visit(symtab, expr.right)
+                ins.append(Copy(loc, value, target))
+                return value
+
+            case BinaryOp() if expr.op == "or" or expr.op == "and":
+                skip_label = new_label(loc)
+                no_skip_label = new_label(loc)
+                result = new_var()
+                left = visit(symtab, expr.left)
+                ins.append(Copy(loc, left, result))
+                if expr.op == "and":
+                    ins.append(CondJump(loc, left, no_skip_label, skip_label))
+                else:
+                    ins.append(CondJump(loc, left, skip_label, no_skip_label))
+                ins.append(no_skip_label)
+                right = visit(symtab, expr.right)
+                ins.append(Copy(loc, right, result))
+                ins.append(skip_label)
+                return result
+
             case BinaryOp():
                 var_op = symtab.require(expr.op)
                 var_left = visit(symtab, expr.left)
@@ -56,7 +79,78 @@ def generate_ir(
                     loc, var_op, [var_left, var_right], var_result))
                 return var_result
 
-        assert 1 == 2
+            case UnaryOp():
+                target = visit(symtab, expr.target)
+                result = new_var()
+                if expr.op == "not":
+                    ins.append(Call(loc, symtab.require(
+                        'unary_not'), [target], result))
+                else:
+                    ins.append(Call(loc, symtab.require(
+                        'unary_-'), [target], result))
+                return result
+
+            case IfBlock():
+                if expr.eelse:
+                    then_label = new_label(loc)
+                    else_label = new_label(loc)
+                    end_label = new_label(loc)
+                    result = new_var()
+                    cond = visit(symtab, expr.condition)
+                    ins.append(CondJump(loc, cond, then_label, else_label))
+                    ins.append(then_label)
+                    result = visit(symtab, expr.then)
+                    ins.append(Jump(loc, end_label))
+                    ins.append(else_label)
+                    result = visit(symtab, expr.eelse)
+                    ins.append(end_label)
+                    return result
+                skip_label = new_label(loc)
+                no_skip_label = new_label(loc)
+                cond = visit(symtab, expr.condition)
+                ins.append(CondJump(loc, cond, no_skip_label, skip_label))
+                ins.append(no_skip_label)
+                visit(symtab, expr.then)
+                ins.append(skip_label)
+                return var_unit
+
+            case While():
+                cond_label = new_label(loc)
+                action_label = new_label(loc)
+                end_label = new_label(loc)
+                cond = new_var()
+                ins.append(cond_label)
+                cond = visit(symtab, expr.condition)
+                ins.append(CondJump(loc, cond, action_label, end_label))
+                ins.append(action_label)
+                visit(symtab, expr.action)
+                ins.append(Jump(loc, cond_label))
+                ins.append(end_label)
+                return var_unit
+
+            case FunctionCall():
+                function = symtab.require(expr.name)
+                args = []
+                for a in expr.args:
+                    var = new_var()
+                    var = visit(symtab, a)
+                    args.append(var)
+                result = new_var()
+                ins.append(Call(loc, function, args, result))
+                return result
+
+            case Block():
+                result = visit(symtab, expr.expressions[0])
+                for e in expr.expressions[1:]:
+                    result = visit(symtab, e)
+                if isinstance(expr.expressions[-1], Literal) and expr.expressions[-1].value is None:
+                    return var_unit
+                return result
+
+            case VarDeclaration():
+                return visit(symtab, expr.value)
+
+        assert 1 == 2  # we should never get here
         return new_var()
 
     root_symtab = SymTab[IRVar](None, dict())
@@ -67,8 +161,8 @@ def generate_ir(
 
     if root_expr.type == Int:
         ins.append(Call(root_expr.loc, IRVar(
-            "print_int"), [var_final_result], var_unit))
+            "print_int"), [var_final_result], new_var()))
     elif root_expr.type == Bool:
         ins.append(Call(root_expr.loc, IRVar(
-            "print_bool"), [var_final_result], var_unit))
+            "print_bool"), [var_final_result], new_var()))
     return ins

@@ -15,8 +15,12 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             if type(node.value) == int:
                 node.type = Int
                 return Int
-            node.type = Bool
-            return Bool
+            elif type(node.value) == bool:
+                node.type = Bool
+                return Bool
+            else:
+                node.type = Unit
+                return Unit
         case BinaryOp():
             left = typecheck_rec(node.left, symtab)
             right = typecheck_rec(node.right, symtab)
@@ -88,7 +92,8 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             return Unit
         case Block():
             new_symtab = SymTab(symtab, dict())
-            return_unit = node.expressions[-1] == None
+            return_unit = isinstance(
+                node.expressions[-1], Literal) and node.expressions[-1].value is None
             last_value = typecheck_rec(node.expressions[0], new_symtab)
             for e in node.expressions[1:]:
                 last_value = typecheck_rec(e, new_symtab)
@@ -98,9 +103,7 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             node.type = last_value
             return last_value
         case FunctionCall():
-            return_type = symtab.find(node.name)
-            if return_type is None:
-                raise Exception(f"{node.loc}: unknown function")
+            return_type = symtab.require(node.name)
             assert (isinstance(return_type, FunType))
             node.type = return_type.value
             return return_type.value

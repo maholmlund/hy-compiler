@@ -361,7 +361,7 @@ def test_return_none() -> None:
         Token(L, "punctuation", ";"),
     ]
     assert parse(tokens) == Block(L,
-                                  [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Expression(L,)])
+                                  [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Literal(L, None, type=Unit)])
 
 
 def test_more_complex_block() -> None:
@@ -384,7 +384,7 @@ def test_more_complex_block() -> None:
         Block(L, [
             Literal(L, 1),
             Literal(L, 1),
-            Block(L, [Expression(L,)])
+            Block(L, [Literal(L, None, type=Unit)])
         ])
     ])
 
@@ -552,7 +552,7 @@ def test_while() -> None:
     ]
     assert parse(tokens) == Block(L, [
         While(L, Literal(L, True), FunctionCall(L, "f", [Literal(L, 1)])),
-        Expression(L)
+        Literal(L, None, type=Unit)
     ])
 
 

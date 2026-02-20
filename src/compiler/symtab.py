@@ -34,8 +34,8 @@ global_symbols: dict[str, Type] = {
     '*': FunType([Int, Int], Int),
     '/': FunType([Int, Int], Int),
     '%': FunType([Int, Int], Int),
-    'and': FunType([Int, Int], Bool),
-    'or': FunType([Int, Int], Bool),
+    'and': FunType([Bool, Bool], Bool),
+    'or': FunType([Bool, Bool], Bool),
     '<=': FunType([Int, Int], Bool),
     '>=': FunType([Int, Int], Bool),
     '>': FunType([Int, Int], Bool),
@@ -43,4 +43,6 @@ global_symbols: dict[str, Type] = {
     'print_int': FunType([Int], Unit),
     'print_bool': FunType([Bool], Unit),
     'read_int': FunType([], Int),
+    'unary_not': FunType([Bool], Bool),
+    'unary_-': FunType([Int], Int),
 }

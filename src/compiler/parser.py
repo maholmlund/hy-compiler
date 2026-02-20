@@ -143,7 +143,7 @@ def parse(tokens: list[Token]) -> Expression:
                 consume(";")  # a semicolon is optional after }
         consume("}")
         if not return_last:
-            expressions.append(Expression(l))
+            expressions.append(Literal(l, None, type=Unit))
         return Block(l, expressions)
 
     def parse_if_then_else() -> IfBlock:
