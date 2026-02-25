@@ -140,15 +140,18 @@ def generate_ir(
                 return result
 
             case Block():
-                result = visit(symtab, expr.expressions[0])
+                new_tab = SymTab(symtab, {})
+                result = visit(new_tab, expr.expressions[0])
                 for e in expr.expressions[1:]:
-                    result = visit(symtab, e)
+                    result = visit(new_tab, e)
                 if isinstance(expr.expressions[-1], Literal) and expr.expressions[-1].value is None:
                     return var_unit
                 return result
 
             case VarDeclaration():
-                return visit(symtab, expr.value)
+                result = visit(symtab, expr.value)
+                symtab.symbols[expr.name] = result
+                return result
 
         assert 1 == 2  # we should never get here
         return new_var()

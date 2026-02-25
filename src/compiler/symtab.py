@@ -40,6 +40,8 @@ global_symbols: dict[str, Type] = {
     '>=': FunType([Int, Int], Bool),
     '>': FunType([Int, Int], Bool),
     '<': FunType([Int, Int], Bool),
+    '!=': FunType([Int, Int], Bool),
+    '==': FunType([Int, Int], Bool),
     'print_int': FunType([Int], Unit),
     'print_bool': FunType([Bool], Unit),
     'read_int': FunType([], Int),
