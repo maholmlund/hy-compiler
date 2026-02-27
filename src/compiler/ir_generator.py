@@ -99,10 +99,10 @@ def generate_ir(
                     cond = visit(symtab, expr.condition)
                     ins.append(CondJump(loc, cond, then_label, else_label))
                     ins.append(then_label)
-                    result = visit(symtab, expr.then)
+                    ins.append(Copy(loc, visit(symtab, expr.then), result))
                     ins.append(Jump(loc, end_label))
                     ins.append(else_label)
-                    result = visit(symtab, expr.eelse)
+                    ins.append(Copy(loc, visit(symtab, expr.eelse), result))
                     ins.append(end_label)
                     return result
                 skip_label = new_label(loc)
@@ -149,7 +149,9 @@ def generate_ir(
                 return result
 
             case VarDeclaration():
-                result = visit(symtab, expr.value)
+                value = visit(symtab, expr.value)
+                result = new_var()
+                ins.append(Copy(loc, value, result))
                 symtab.symbols[expr.name] = result
                 return result
 
