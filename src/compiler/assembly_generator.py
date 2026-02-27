@@ -113,7 +113,7 @@ def generate_assembly(instructions: list[Instruction]) -> str:
                     registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"]
                     for (i, arg) in enumerate(ins.args):
                         emit(f'movq {locals.get_ref(arg)}, {registers[i]}')
-                    if ins.fun.name == "print_int" or ins.fun.name == "print_bool":
+                    if ins.fun.name in ["print_int", "print_bool", "read_int"]:
                         emit(f'call {ins.fun.name}')
                     else:
                         emit(f'call {locals.get_ref(ins.fun)}')

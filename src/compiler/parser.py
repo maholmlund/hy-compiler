@@ -55,6 +55,8 @@ def parse(tokens: list[Token]) -> Expression:
             raise Exception(f"{value.loc}: expected literal")
 
     def parse_arg_list() -> list[Expression]:
+        if peek().text == ")":
+            return []
         result = [parse_expression()]
         while peek().text == ",":
             consume(",")
