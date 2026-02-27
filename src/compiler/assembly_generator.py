@@ -1,5 +1,6 @@
 import dataclasses
 from compiler.ir import *
+from compiler.intrinsics import *
 
 
 class Locals:
@@ -100,6 +101,23 @@ def generate_assembly(instructions: list[Instruction]) -> str:
                 emit(f'cmpq $0, {locals.get_ref(ins.cond)}')
                 emit(f'jne .{ins.then_label.name}')
                 emit(f'jmp .{ins.else_label.name}')
+            case Call():
+                if ins.fun.name in all_intrinsics.keys():
+                    all_intrinsics[ins.fun.name](IntrinsicArgs(
+                        [locals.get_ref(v) for v in ins.args],
+                        "%rax",
+                        emit
+                    ))
+                    pass
+                else:
+                    registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"]
+                    for (i, arg) in enumerate(ins.args):
+                        emit(f'movq {locals.get_ref(arg)}, {registers[i]}')
+                    if ins.fun.name == "print_int" or ins.fun.name == "print_bool":
+                        emit(f'call {ins.fun.name}')
+                    else:
+                        emit(f'call {locals.get_ref(ins.fun)}')
+                emit(f'movq %rax, {locals.get_ref(ins.dest)}')
     emit("movq %rbp, %rsp")
     emit("popq %rbp")
     emit("ret")
