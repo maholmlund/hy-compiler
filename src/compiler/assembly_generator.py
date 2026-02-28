@@ -13,6 +13,8 @@ class Locals:
         self._var_to_location = {}
         for (i, v) in enumerate(variables):
             self._var_to_location[v] = f"{-(i + 1) * 8}(%rbp)"
+        for fn_name in ["print_int", "print_bool", "read_int"]:
+            self._var_to_location[IRVar(fn_name)] = f"${fn_name}"
 
     def get_ref(self, v: IRVar) -> str:
         """Returns an Assembly reference like `-24(%rbp)`

@@ -105,6 +105,15 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
         case FunctionCall():
             return_type = symtab.require(node.name)
             assert (isinstance(return_type, FunType))
+            if len(node.args) != len(return_type.args):
+                raise Exception(
+                    f"{node.loc}: invalid number of function arguments")
+            for (i, arg) in enumerate(node.args):
+                arg_type = typecheck_rec(arg, symtab)
+                if arg_type != return_type.args[i]:
+                    raise Exception(
+                        f"{arg.loc}: invalid type for function argument")
+                node.args[i].type = arg_type
             node.type = return_type.value
             return return_type.value
         case VarDeclaration():

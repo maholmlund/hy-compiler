@@ -14,7 +14,9 @@ la_operators = [
 
 
 def parse(tokens: list[Token]) -> Expression:
-
+    # This function is the most horrible spaghetti code
+    # I have ever written. It is horrible, I am ashamed of it.
+    # I hate it.
     pos = 0
     last_token: Token | None = None
 
@@ -206,7 +208,7 @@ def parse(tokens: list[Token]) -> Expression:
 
     def parse_expression() -> Expression:
         if peek().text == "{":
-            return parse_block()
+            return parse_la_operator(0)
         return parse_assignment_operator()
 
     if not tokens:
