@@ -49,6 +49,10 @@ class Expression:
                 return f"Block(type: {self.type}, [{', '.join(str(e) for e in self.expressions)}])"
             case VarDeclaration():
                 return f"VarDeclaration(type: {self.type}, name: {self.name}, value: {self.value})"
+            case Break():
+                return f"Break(type: {self.type})"
+            case Continue():
+                return f"Continue(type: {self.type})"
         return ""
 
 
@@ -104,3 +108,13 @@ class VarDeclaration(Expression):
     name: str
     value: Expression
     var_type: Type | None = None
+
+
+@dataclass
+class Break(Expression):
+    pass
+
+
+@dataclass
+class Continue(Expression):
+    pass

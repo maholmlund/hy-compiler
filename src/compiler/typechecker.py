@@ -126,5 +126,9 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             symtab.symbols[node.name] = var_type
             node.type = Unit
             return Unit
+        case Break():
+            return Unit
+        case Continue():
+            return Unit
     node.type = Unit
     return Unit

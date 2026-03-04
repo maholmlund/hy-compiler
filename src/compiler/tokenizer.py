@@ -29,7 +29,8 @@ regexes = [
     ("newline", r'\n'),
 ]
 
-keywords = ["if", "then", "else", "while", "var", "do", "Int", "Bool", "Unit"]
+keywords = ["if", "then", "else", "while", "var",
+            "do", "Int", "Bool", "Unit", "break", "continue"]
 
 
 def tokenize(source_code: str) -> list[Token]:

@@ -19,6 +19,7 @@ def parse(tokens: list[Token]) -> Expression:
     # I hate it.
     pos = 0
     last_token: Token | None = None
+    inside_loop = False
 
     def peek() -> Token:
         if pos < len(tokens):
@@ -76,6 +77,14 @@ def parse(tokens: list[Token]) -> Expression:
         consume(")")
         return FunctionCall(value.loc, value.text, args)
 
+    # bc = break/continue
+    def parse_bc() -> Expression:
+        value = consume(["break", "continue"])
+        if value.text == "break":
+            return Break(value.loc)
+        else:
+            return Continue(value.loc)
+
     def parse_term() -> Expression:
         value = peek()
         result = None
@@ -98,6 +107,8 @@ def parse(tokens: list[Token]) -> Expression:
             result = parse_while()
         elif value.text in ["-", "not"]:
             result = parse_term()
+        elif value.text in ["break", "continue"]:
+            result = parse_bc()
         else:
             raise Exception(f"{value.loc}: expected term")
         if not unary:
@@ -162,10 +173,15 @@ def parse(tokens: list[Token]) -> Expression:
         return IfBlock(l, condition, then, eelse)
 
     def parse_while() -> While:
+        nonlocal inside_loop
+        unset_inside_loop = not inside_loop
+        inside_loop = True
         l = consume("while").loc
         condition = parse_expression()
         consume("do")
         action = parse_expression()
+        if unset_inside_loop:
+            inside_loop = False
         return While(l, condition, action)
 
     def parse_variable_declaration() -> VarDeclaration:

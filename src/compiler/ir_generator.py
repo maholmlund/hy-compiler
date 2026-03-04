@@ -10,6 +10,8 @@ def generate_ir(
     reserved_names = set(k for k in global_symbols.keys())
     var_counter = 0
     label_counter = 0
+    loop_start_label: Label | None = None
+    loop_end_label: Label | None = None
 
     def new_var() -> IRVar:
         nonlocal var_counter
@@ -25,6 +27,8 @@ def generate_ir(
 
     def visit(symtab: SymTab[IRVar], expr: Expression) -> IRVar:
         loc = expr.loc
+        nonlocal loop_start_label
+        nonlocal loop_end_label
 
         match expr:
             case Literal():
@@ -120,12 +124,18 @@ def generate_ir(
                 end_label = new_label(loc)
                 cond = new_var()
                 ins.append(cond_label)
+                old_loop_start = loop_start_label
+                old_loop_end = loop_end_label
+                loop_start_label = cond_label
+                loop_end_label = end_label
                 cond = visit(symtab, expr.condition)
                 ins.append(CondJump(loc, cond, action_label, end_label))
                 ins.append(action_label)
                 visit(symtab, expr.action)
                 ins.append(Jump(loc, cond_label))
                 ins.append(end_label)
+                loop_start_label = old_loop_start
+                loop_end_label = old_loop_end
                 return var_unit
 
             case FunctionCall():
@@ -154,6 +164,18 @@ def generate_ir(
                 ins.append(Copy(loc, value, result))
                 symtab.symbols[expr.name] = result
                 return result
+
+            case Break():
+                if loop_end_label is None:
+                    raise Exception(f"{loc}: break not inside loop")
+                ins.append(Jump(loc, loop_end_label))
+                return var_unit
+
+            case Continue():
+                if loop_start_label is None:
+                    raise Exception(f"{loc}: continue not inside loop")
+                ins.append(Jump(loc, loop_start_label))
+                return var_unit
 
         assert 1 == 2  # we should never get here
         return new_var()
