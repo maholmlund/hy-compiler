@@ -143,6 +143,7 @@ def parse(tokens: list[Token]) -> Expression:
 
     def parse_block() -> Block:
         expressions: list[Expression] = []
+        functions: list[Function] = []
         l = consume("{").loc
         return_last = False
         while peek().text != "}":
@@ -159,7 +160,7 @@ def parse(tokens: list[Token]) -> Expression:
         consume("}")
         if not return_last:
             expressions.append(Literal(l, None, type=Unit))
-        return Block(l, expressions)
+        return Block(l, expressions, functions)
 
     def parse_if_then_else() -> IfBlock:
         l = consume('if').loc

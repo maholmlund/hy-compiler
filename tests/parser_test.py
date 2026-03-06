@@ -13,7 +13,7 @@ def test_plusminus_simple() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(
-        L, [BinaryOp(L, Literal(L, 2), '+', Literal(L, 3))])
+        L, [BinaryOp(L, Literal(L, 2), '+', Literal(L, 3))], [])
 
 
 def test_plusminus_multiple() -> None:
@@ -27,7 +27,7 @@ def test_plusminus_multiple() -> None:
         Token(L, "int_literal", "4"),
     ]
     assert parse(tokens) == Block(L, [BinaryOp(L, BinaryOp(L,
-                                                           BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '-', Literal(L, 3)), '+', Literal(L, 4))])
+                                                           BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '-', Literal(L, 3)), '+', Literal(L, 4))], [])
 
 
 def test_plusminus_invalid_syntax() -> None:
@@ -51,7 +51,7 @@ def test_precedence() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(L, [BinaryOp(L, Literal(L, 1), '+',
-                                               BinaryOp(L, Literal(L, 2), '*', Literal(L, 3)))])
+                                               BinaryOp(L, Literal(L, 2), '*', Literal(L, 3)))], [])
 
 
 def test_assignment_precedence() -> None:
@@ -76,7 +76,7 @@ def test_assignment_precedence() -> None:
                                                         ),
                                                "=",
                                                Literal(L, 4)
-                                               )])
+                                               )], [])
 
 
 def test_parenthesis() -> None:
@@ -90,7 +90,7 @@ def test_parenthesis() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(L, [BinaryOp(L,
-                                               BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '*', Literal(L, 3))])
+                                               BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '*', Literal(L, 3))], [])
 
 
 def test_complex_math() -> None:
@@ -135,7 +135,7 @@ def test_complex_math() -> None:
                                                         '*',
                                                         Literal(L, 2)
                                                         )
-                                               )])
+                                               )], [])
 
 
 def test_unary_operator_chaining() -> None:
@@ -146,7 +146,7 @@ def test_unary_operator_chaining() -> None:
         Token(L, "int_literal", "4"),
     ]
     assert parse(tokens) == Block(L, [UnaryOp(L,
-                                              "-", UnaryOp(L, "-", UnaryOp(L, "not", Literal(L, 4))))])
+                                              "-", UnaryOp(L, "-", UnaryOp(L, "not", Literal(L, 4))))], [])
 
 
 def test_unmatched_parenthesis() -> None:
@@ -200,7 +200,7 @@ def test_if() -> None:
         Token(L, "int_literal", "2"),
     ]
     assert parse(tokens) == Block(
-        L, [IfBlock(L, Literal(L, 1), Literal(L, 2), None)])
+        L, [IfBlock(L, Literal(L, 1), Literal(L, 2), None)], [])
 
 
 def test_if_else() -> None:
@@ -213,7 +213,7 @@ def test_if_else() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(L,
-                                  [IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3))])
+                                  [IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3))], [])
 
 
 def test_if_as_part_of_expression() -> None:
@@ -228,7 +228,7 @@ def test_if_as_part_of_expression() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(L, [BinaryOp(L, Literal(L, 0), '+',
-                                               IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3)))])
+                                               IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3)))], [])
 
 
 def test_nested_if() -> None:
@@ -246,7 +246,7 @@ def test_nested_if() -> None:
         Token(L, "int_literal", "3"),
     ]
     assert parse(tokens) == Block(L, [IfBlock(L, Literal(L, False), IfBlock(L,
-                                                                            Literal(L, 1), Literal(L, 2), None), Literal(L, 3))])
+                                                                            Literal(L, 1), Literal(L, 2), None), Literal(L, 3))], [])
 
 
 def test_function() -> None:
@@ -259,7 +259,7 @@ def test_function() -> None:
         Token(L, "punctuation", ")"),
     ]
     assert parse(tokens) == Block(L,
-                                  [FunctionCall(L, "foo", [Literal(L, 1), Literal(L, 2)])])
+                                  [FunctionCall(L, "foo", [Literal(L, 1), Literal(L, 2)])], [])
 
 
 def test_nested_functions() -> None:
@@ -297,7 +297,7 @@ def test_nested_functions() -> None:
                                                                         L, 4)]
                                                                     )
                                                    ]
-                                                   )])
+                                                   )], [])
 
 
 def test_missing_argument() -> None:
@@ -336,9 +336,9 @@ def test_block_with_return_value() -> None:
                                   [Literal(L, 1)]
                                   ),
                      Identifier(L, "a")
-                 ])
+                 ], [])
                  )
-    ])
+    ], [])
 
 
 def test_missing_semicolon() -> None:
@@ -361,7 +361,7 @@ def test_return_none() -> None:
         Token(L, "punctuation", ";"),
     ]
     assert parse(tokens) == Block(L,
-                                  [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Literal(L, None, type=Unit)])
+                                  [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Literal(L, None, type=Unit)], [])
 
 
 def test_more_complex_block() -> None:
@@ -384,9 +384,9 @@ def test_more_complex_block() -> None:
         Block(L, [
             Literal(L, 1),
             Literal(L, 1),
-            Block(L, [Literal(L, None, type=Unit)])
-        ])
-    ])
+            Block(L, [Literal(L, None, type=Unit)], [])
+        ], [])
+    ], [])
 
 
 def test_var_declaration() -> None:
@@ -398,7 +398,7 @@ def test_var_declaration() -> None:
     ]
     assert parse(tokens) == Block(L, [
         VarDeclaration(L, "a", Literal(L, 1))
-    ])
+    ], [])
 
 
 def test_var_not_allowed() -> None:
@@ -553,7 +553,7 @@ def test_while() -> None:
     assert parse(tokens) == Block(L, [
         While(L, Literal(L, True), FunctionCall(L, "f", [Literal(L, 1)])),
         Literal(L, None, type=Unit)
-    ])
+    ], [])
 
 
 def test_while_complex() -> None:
@@ -579,12 +579,12 @@ def test_while_complex() -> None:
         While(L,
               Block(L, [FunctionCall(L, "f", [
                   Literal(L, 1)
-              ])]),
+              ])], []),
               Block(L, [
                   FunctionCall(L, "f", [Literal(L, 1)]),
                   Literal(L, 1)
-              ]))
-    ])
+              ], []))
+    ], [])
 
 
 def test_type_parsing() -> None:
@@ -626,5 +626,5 @@ def test_type_parsing() -> None:
                        FunType([Int, Bool], Bool)),
         VarDeclaration(L, "c", Identifier(
             L, "print_int"), FunType([Int], Bool)),
-    ])
+    ], [])
     assert str(parse(tokens)) == str(target)
