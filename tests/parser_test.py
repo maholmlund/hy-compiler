@@ -628,3 +628,32 @@ def test_type_parsing() -> None:
             L, "print_int"), FunType([Int], Bool)),
     ], [])
     assert str(parse(tokens)) == str(target)
+
+
+def test_function_definition() -> None:
+    tokens = [
+        Token(L, "keyword", "fun"),
+        Token(L, "identifier", "f"),
+        Token(L, "punctuation", "("),
+        Token(L, "identifier", "x"),
+        Token(L, "punctuation", ":"),
+        Token(L, "keyword", "Int"),
+        Token(L, "punctuation", ")"),
+        Token(L, "punctuation", "=>"),
+        Token(L, "keyword", "Int"),
+        Token(L, "punctuation", "{"),
+        Token(L, "int_literal", "2"),
+        Token(L, "operator", "+"),
+        Token(L, "identifier", "x"),
+        Token(L, "punctuation", "}"),
+        Token(L, "identifier", "f"),
+        Token(L, "punctuation", "("),
+        Token(L, "int_literal", "2"),
+        Token(L, "punctuation", ")"),
+    ]
+    assert parse(tokens) == Block(L, [FunctionCall(L, "f", [Literal(L, 2)])], [Function(L, "f", {"x": Int}, Int,
+                                                                                        Block(L, [
+                                                                                            BinaryOp(L, Literal(
+                                                                                                L, 2), "+", Identifier(L, "x"))
+                                                                                        ], [])
+                                                                                        )])

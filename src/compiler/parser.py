@@ -45,9 +45,6 @@ def parse(tokens: list[Token]) -> Expression:
         pos += 1
         return token
 
-    def semicolon_needed_after(e: Expression) -> bool:
-        return not (last_token is not None and last_token.text == "}")
-
     def parse_literal() -> Literal:
         value = consume()
         if value.type == "int_literal":
@@ -141,7 +138,26 @@ def parse(tokens: list[Token]) -> Expression:
         consume(')')
         return result
 
+    def parse_function() -> Function:
+        l = consume("fun").loc
+        name = consume().text
+        args = {}
+        consume("(")
+        while peek().text != ")":
+            arg_name = consume().text
+            consume(":")
+            arg_type = parse_type_keyword()
+            args[arg_name] = arg_type
+            if peek().text == ",":
+                consume()
+        consume(")")
+        consume("=>")
+        ret_val = parse_type_keyword()
+        block = parse_block()
+        return Function(l, name, args, ret_val, block)
+
     def parse_block() -> Block:
+        nonlocal last_token
         expressions: list[Expression] = []
         functions: list[Function] = []
         l = consume("{").loc
@@ -150,13 +166,16 @@ def parse(tokens: list[Token]) -> Expression:
             if peek().text == "var":
                 # var only allowed directly inside blocks
                 expressions.append(parse_variable_declaration())
+            elif peek().text == "fun":
+                functions.append(parse_function())
             else:
                 expressions.append(parse_expression())
             if peek().text == "}":
                 return_last = True
                 break
-            if semicolon_needed_after(expressions[-1]) or peek().text == ";":
-                consume(";")  # a semicolon is optional after }
+            assert last_token is not None
+            if last_token.text not in ["{", "}"] or peek().text == ";":
+                consume(";")
         consume("}")
         if not return_last:
             expressions.append(Literal(l, None, type=Unit))

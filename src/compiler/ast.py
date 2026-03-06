@@ -126,4 +126,6 @@ class Continue(Expression):
 @dataclass
 class Function(Expression):
     name: str
+    args: dict[str, Type]
+    ret_val: Type
     block: Block
