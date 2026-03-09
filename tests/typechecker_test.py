@@ -21,7 +21,7 @@ a
         VarDeclaration(L, "a",
                        Literal(L, 1, type=Int), type=Unit),
         Identifier(L, "a", type=Int),
-    ], [], type=Int)
+    ], type=Int)
     assert build_ast(c) == target
 
 
@@ -39,9 +39,9 @@ if a > 1 then {
                          ">", Literal(L, 1, type=Int), type=Bool),
                 Block(L, [
                     Identifier(L, "a", type=Int),
-                ], [], type=Int),
+                ], type=Int),
                 None, type=Int),
-    ], [], type=Int)
+    ], type=Int)
     assert build_ast(c) == target
 
 

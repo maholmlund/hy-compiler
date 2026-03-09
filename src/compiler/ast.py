@@ -46,15 +46,13 @@ class Expression:
             case FunctionCall():
                 return f"FunctionCall(type: {self.type}, name: {self.name}, args: {self.args})"
             case Block():
-                return f"Block(type: {self.type}, expressions: [{', '.join(str(e) for e in self.expressions)}], functions: [{', '.join(str(f) for f in self.functions)}])"
+                return f"Block(type: {self.type}, [{', '.join(str(e) for e in self.expressions)}])"
             case VarDeclaration():
                 return f"VarDeclaration(type: {self.type}, name: {self.name}, value: {self.value})"
             case Break():
                 return f"Break(type: {self.type})"
             case Continue():
                 return f"Continue(type: {self.type})"
-            case Function():
-                return f"Function(type: {self.type}, name: {self.name}, statement: {self.block})"
         return ""
 
 
@@ -103,7 +101,6 @@ class FunctionCall(Expression):
 @dataclass
 class Block(Expression):
     expressions: list[Expression]
-    functions: list["Function"]
 
 
 @dataclass
@@ -121,9 +118,3 @@ class Break(Expression):
 @dataclass
 class Continue(Expression):
     pass
-
-
-@dataclass
-class Function(Expression):
-    name: str
-    block: Block
