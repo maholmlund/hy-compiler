@@ -130,5 +130,14 @@ def typecheck_rec(node: Expression, symtab: SymTab) -> Type:
             return Unit
         case Continue():
             return Unit
+        case Module():
+            new_symtab = SymTab(symtab, dict())
+            if len(node.expressions) == 0:
+                return Unit
+            for e in node.expressions[:-1]:
+                typecheck_rec(e, new_symtab)
+            last_value = typecheck_rec(node.expressions[-1], new_symtab)
+            node.type = last_value
+            return last_value
     node.type = Unit
     return Unit

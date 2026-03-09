@@ -13,9 +13,9 @@ def interpret_rec(ast: Expression, symboltable: SymbolTable) -> int | bool | Non
     match ast:
         case Block():
             last = None
-            block_context = SymbolTable(dict(), symboltable)
+            module_context = SymbolTable(dict(), symboltable)
             for e in ast.expressions:
-                last = interpret_rec(e, block_context)
+                last = interpret_rec(e, module_context)
             return last
         case Literal():
             return ast.value
@@ -186,6 +186,13 @@ def interpret_rec(ast: Expression, symboltable: SymbolTable) -> int | bool | Non
                         f"{ast.loc}: invalid number of arguments for read_int")
                 value = int(input("read_int: "))
                 return value
+
+        case Module():
+            last = None
+            module_context = SymbolTable(dict(), symboltable)
+            for e in ast.expressions:
+                last = interpret_rec(e, module_context)
+            return last
 
         case Expression():
             return None

@@ -118,3 +118,17 @@ class Break(Expression):
 @dataclass
 class Continue(Expression):
     pass
+
+
+@dataclass
+class Function(Expression):
+    name: str
+    args: dict[str, Type]
+    ret_val: Type
+    block: Block
+
+
+@dataclass
+class Module(Expression):
+    expressions: list[Expression]
+    functions: list[Function]

@@ -12,8 +12,8 @@ def test_plusminus_simple() -> None:
         Token(L, "operator", "+"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(
-        L, [BinaryOp(L, Literal(L, 2), '+', Literal(L, 3))])
+    assert parse(tokens) == Module(
+        L, [BinaryOp(L, Literal(L, 2), '+', Literal(L, 3))], [])
 
 
 def test_plusminus_multiple() -> None:
@@ -26,8 +26,8 @@ def test_plusminus_multiple() -> None:
         Token(L, "operator", "+"),
         Token(L, "int_literal", "4"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L, BinaryOp(L,
-                                                           BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '-', Literal(L, 3)), '+', Literal(L, 4))])
+    assert parse(tokens) == Module(L, [BinaryOp(L, BinaryOp(L,
+                                                            BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '-', Literal(L, 3)), '+', Literal(L, 4))], [])
 
 
 def test_plusminus_invalid_syntax() -> None:
@@ -50,8 +50,8 @@ def test_precedence() -> None:
         Token(L, "operator", "*"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L, Literal(L, 1), '+',
-                                               BinaryOp(L, Literal(L, 2), '*', Literal(L, 3)))])
+    assert parse(tokens) == Module(L, [BinaryOp(L, Literal(L, 1), '+',
+                                                BinaryOp(L, Literal(L, 2), '*', Literal(L, 3)))], [])
 
 
 def test_assignment_precedence() -> None:
@@ -64,19 +64,20 @@ def test_assignment_precedence() -> None:
         Token(L, "operator", "="),
         Token(L, "int_literal", "4"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L,
-                                               BinaryOp(L,
-                                                        Literal(L, 1),
-                                                        "+",
-                                                        BinaryOp(L,
-                                                                 Literal(L, 2),
-                                                                 "*",
-                                                                 Literal(L, 3)
-                                                                 ),
-                                                        ),
-                                               "=",
-                                               Literal(L, 4)
-                                               )])
+    assert parse(tokens) == Module(L, [BinaryOp(L,
+                                                BinaryOp(L,
+                                                         Literal(L, 1),
+                                                         "+",
+                                                         BinaryOp(L,
+                                                                  Literal(
+                                                                      L, 2),
+                                                                  "*",
+                                                                  Literal(L, 3)
+                                                                  ),
+                                                         ),
+                                                "=",
+                                                Literal(L, 4)
+                                                )], [])
 
 
 def test_parenthesis() -> None:
@@ -89,8 +90,8 @@ def test_parenthesis() -> None:
         Token(L, "operator", "*"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L,
-                                               BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '*', Literal(L, 3))])
+    assert parse(tokens) == Module(L, [BinaryOp(L,
+                                                BinaryOp(L, Literal(L, 1), '+', Literal(L, 2)), '*', Literal(L, 3))], [])
 
 
 def test_complex_math() -> None:
@@ -112,30 +113,30 @@ def test_complex_math() -> None:
         Token(L, "operator", "*"),
         Token(L, "int_literal", "2"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L,
-                                               Literal(L, 1),
-                                               '+',
-                                               BinaryOp(L,
-                                                        BinaryOp(L,
-                                                                 BinaryOp(L,
-                                                                          BinaryOp(L,
-                                                                                   Literal(
-                                                                                       L, 2),
-                                                                                   '*',
-                                                                                   Literal(
-                                                                                       L, 3)
-                                                                                   ),
-                                                                          '-',
-                                                                          Literal(
-                                                                              L, 4)
-                                                                          ),
-                                                                 '-',
-                                                                 Literal(L, 2)
-                                                                 ),
-                                                        '*',
-                                                        Literal(L, 2)
-                                                        )
-                                               )])
+    assert parse(tokens) == Module(L, [BinaryOp(L,
+                                                Literal(L, 1),
+                                                '+',
+                                                BinaryOp(L,
+                                                         BinaryOp(L,
+                                                                  BinaryOp(L,
+                                                                           BinaryOp(L,
+                                                                                    Literal(
+                                                                                        L, 2),
+                                                                                    '*',
+                                                                                    Literal(
+                                                                                        L, 3)
+                                                                                    ),
+                                                                           '-',
+                                                                           Literal(
+                                                                               L, 4)
+                                                                           ),
+                                                                  '-',
+                                                                  Literal(L, 2)
+                                                                  ),
+                                                         '*',
+                                                         Literal(L, 2)
+                                                         )
+                                                )], [])
 
 
 def test_unary_operator_chaining() -> None:
@@ -145,8 +146,8 @@ def test_unary_operator_chaining() -> None:
         Token(L, "operator", "not"),
         Token(L, "int_literal", "4"),
     ]
-    assert parse(tokens) == Block(L, [UnaryOp(L,
-                                              "-", UnaryOp(L, "-", UnaryOp(L, "not", Literal(L, 4))))])
+    assert parse(tokens) == Module(L, [UnaryOp(L,
+                                               "-", UnaryOp(L, "-", UnaryOp(L, "not", Literal(L, 4))))], [])
 
 
 def test_unmatched_parenthesis() -> None:
@@ -177,7 +178,7 @@ def test_extra_tokens() -> None:
 
 def test_no_tokens() -> None:
     tokens: list[Token] = []
-    assert parse(tokens) == Expression(L,)
+    assert parse(tokens) == Module(L, [], [])
 
 
 def test_missing_identifier() -> None:
@@ -199,8 +200,8 @@ def test_if() -> None:
         Token(L, "keyword", "then"),
         Token(L, "int_literal", "2"),
     ]
-    assert parse(tokens) == Block(
-        L, [IfBlock(L, Literal(L, 1), Literal(L, 2), None)])
+    assert parse(tokens) == Module(
+        L, [IfBlock(L, Literal(L, 1), Literal(L, 2), None)], [])
 
 
 def test_if_else() -> None:
@@ -212,8 +213,8 @@ def test_if_else() -> None:
         Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L,
-                                  [IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3))])
+    assert parse(tokens) == Module(L,
+                                   [IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3))], [])
 
 
 def test_if_as_part_of_expression() -> None:
@@ -227,8 +228,8 @@ def test_if_as_part_of_expression() -> None:
         Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L, [BinaryOp(L, Literal(L, 0), '+',
-                                               IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3)))])
+    assert parse(tokens) == Module(L, [BinaryOp(L, Literal(L, 0), '+',
+                                                IfBlock(L, Literal(L, 1), Literal(L, 2), Literal(L, 3)))], [])
 
 
 def test_nested_if() -> None:
@@ -245,8 +246,8 @@ def test_nested_if() -> None:
         Token(L, "keyword", "else"),
         Token(L, "int_literal", "3"),
     ]
-    assert parse(tokens) == Block(L, [IfBlock(L, Literal(L, False), IfBlock(L,
-                                                                            Literal(L, 1), Literal(L, 2), None), Literal(L, 3))])
+    assert parse(tokens) == Module(L, [IfBlock(L, Literal(L, False), IfBlock(L,
+                                                                             Literal(L, 1), Literal(L, 2), None), Literal(L, 3))], [])
 
 
 def test_function() -> None:
@@ -258,8 +259,8 @@ def test_function() -> None:
         Token(L, "int_literal", "2"),
         Token(L, "punctuation", ")"),
     ]
-    assert parse(tokens) == Block(L,
-                                  [FunctionCall(L, "foo", [Literal(L, 1), Literal(L, 2)])])
+    assert parse(tokens) == Module(L,
+                                   [FunctionCall(L, "foo", [Literal(L, 1), Literal(L, 2)])], [])
 
 
 def test_nested_functions() -> None:
@@ -281,23 +282,23 @@ def test_nested_functions() -> None:
         Token(L, "punctuation", ")"),
         Token(L, "punctuation", ")"),
     ]
-    assert parse(tokens) == Block(L, [FunctionCall(L,
-                                                   "foo",
-                                                   [
-                                                       FunctionCall(L,
-                                                                    "bar",
-                                                                    [Literal(
-                                                                        L, 3)]
-                                                                    ),
-                                                       Literal(L, 1),
-                                                       Literal(L, 2),
-                                                       FunctionCall(L,
-                                                                    "bar",
-                                                                    [Literal(
-                                                                        L, 4)]
-                                                                    )
-                                                   ]
-                                                   )])
+    assert parse(tokens) == Module(L, [FunctionCall(L,
+                                                    "foo",
+                                                    [
+                                                        FunctionCall(L,
+                                                                     "bar",
+                                                                     [Literal(
+                                                                         L, 3)]
+                                                                     ),
+                                                        Literal(L, 1),
+                                                        Literal(L, 2),
+                                                        FunctionCall(L,
+                                                                     "bar",
+                                                                     [Literal(
+                                                                         L, 4)]
+                                                                     )
+                                                    ]
+                                                    )], [])
 
 
 def test_missing_argument() -> None:
@@ -326,7 +327,7 @@ def test_block_with_return_value() -> None:
         Token(L, "identifier", "a"),
         Token(L, "punctuation", "}"),
     ]
-    assert parse(tokens) == Block(L, [
+    assert parse(tokens) == Module(L, [
         BinaryOp(L,
                  Identifier(L, "a"),
                  "=",
@@ -338,7 +339,7 @@ def test_block_with_return_value() -> None:
                      Identifier(L, "a")
                  ])
                  )
-    ])
+    ], [])
 
 
 def test_missing_semicolon() -> None:
@@ -360,8 +361,8 @@ def test_return_none() -> None:
         Token(L, "int_literal", "1"),
         Token(L, "punctuation", ";"),
     ]
-    assert parse(tokens) == Block(L,
-                                  [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Literal(L, None, type=Unit)])
+    assert parse(tokens) == Module(L,
+                                   [BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)), Literal(L, None, type=Unit)], [])
 
 
 def test_more_complex_block() -> None:
@@ -379,14 +380,14 @@ def test_more_complex_block() -> None:
         Token(L, "punctuation", "}"),
         Token(L, "punctuation", "}"),
     ]
-    assert parse(tokens) == Block(L, [
+    assert parse(tokens) == Module(L, [
         BinaryOp(L, Identifier(L, "f"), "+", Literal(L, 1)),
         Block(L, [
             Literal(L, 1),
             Literal(L, 1),
             Block(L, [Literal(L, None, type=Unit)])
         ])
-    ])
+    ], [])
 
 
 def test_var_declaration() -> None:
@@ -396,9 +397,9 @@ def test_var_declaration() -> None:
         Token(L, "operator", "="),
         Token(L, "int_literal", "1"),
     ]
-    assert parse(tokens) == Block(L, [
+    assert parse(tokens) == Module(L, [
         VarDeclaration(L, "a", Literal(L, 1))
-    ])
+    ], [])
 
 
 def test_var_not_allowed() -> None:
@@ -550,10 +551,10 @@ def test_while() -> None:
         Token(L, "punctuation", ")"),
         Token(L, "punctuation", ";"),
     ]
-    assert parse(tokens) == Block(L, [
+    assert parse(tokens) == Module(L, [
         While(L, Literal(L, True), FunctionCall(L, "f", [Literal(L, 1)])),
         Literal(L, None, type=Unit)
-    ])
+    ], [])
 
 
 def test_while_complex() -> None:
@@ -575,7 +576,7 @@ def test_while_complex() -> None:
         Token(L, "int_literal", "1"),
         Token(L, "punctuation", "}"),
     ]
-    assert parse(tokens) == Block(L, [
+    assert parse(tokens) == Module(L, [
         While(L,
               Block(L, [FunctionCall(L, "f", [
                   Literal(L, 1)
@@ -584,7 +585,7 @@ def test_while_complex() -> None:
                   FunctionCall(L, "f", [Literal(L, 1)]),
                   Literal(L, 1)
               ]))
-    ])
+    ], [])
 
 
 def test_type_parsing() -> None:
@@ -620,11 +621,11 @@ def test_type_parsing() -> None:
         Token(L, "punctuation", "="),
         Token(L, "identifier", "print_int"),
     ]
-    target = Block(L, [
+    target = Module(L, [
         VarDeclaration(L, "a", Literal(L, 1), Int),
         VarDeclaration(L, "b", Identifier(L, "print_int"),
                        FunType([Int, Bool], Bool)),
         VarDeclaration(L, "c", Identifier(
             L, "print_int"), FunType([Int], Bool)),
-    ])
+    ], [])
     assert str(parse(tokens)) == str(target)

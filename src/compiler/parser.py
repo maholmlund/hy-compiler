@@ -13,7 +13,7 @@ la_operators = [
 ]
 
 
-def parse(tokens: list[Token]) -> Expression:
+def parse(tokens: list[Token]) -> Module:
     # This function is the most horrible spaghetti code
     # I have ever written. It is horrible, I am ashamed of it.
     # I hate it.
@@ -222,16 +222,53 @@ def parse(tokens: list[Token]) -> Expression:
             return Bool
         raise Exception(f"{t.loc}: expected valid type")
 
+    def parse_function() -> Function:
+        l = consume("fun").loc
+        name = consume().text
+        args: dict[str, Type] = {}
+        consume("(")
+        while True:
+            arg_name = consume().text
+            consume(":")
+            arg_type = parse_type_keyword()
+            args[arg_name] = arg_type
+            if peek().text == ")":
+                break
+            consume(",")
+        consume(")")
+        consume(":")
+        ret_type = parse_type_keyword()
+        block = parse_block()
+        return Function(l, name, args, ret_type, block)
+
+    def parse_module() -> Module:
+        result = Module(Loc(1, 1), [], [])
+        return_last = False
+        while pos != len(tokens):
+            if peek().text == "fun":
+                result.functions.append(parse_function())
+            elif peek().text == "var":
+                result.expressions.append(parse_variable_declaration())
+            else:
+                result.expressions.append(parse_expression())
+            if pos == len(tokens):
+                return_last = True
+                break
+            assert last_token is not None
+            if last_token.text not in ["{", "}"] or peek().text == ";":
+                consume(";")
+        if not return_last:
+            result.expressions.append(Literal(L, None, type=Unit))
+        return result
+
     def parse_expression() -> Expression:
         if peek().text == "{":
             return parse_la_operator(0)
         return parse_assignment_operator()
 
     if not tokens:
-        return Expression(Loc(1, 1))
-    tokens.append(Token(L, "punctuation", "}"))
-    tokens.insert(0, Token(L, "punctuation", "{"))
-    result = parse_expression()
+        return Module(Loc(1, 1), [], [])
+    result = parse_module()
     if pos != len(tokens):
         raise Exception("expected EOF")
     return result
