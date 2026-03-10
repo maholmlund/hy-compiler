@@ -234,7 +234,7 @@ def parse(tokens: list[Token]) -> Module:
         name = consume().text
         args = []
         consume("(")
-        while True:
+        while peek().text != ")":
             arg_name = consume().text
             consume(":")
             arg_type = parse_type_keyword()

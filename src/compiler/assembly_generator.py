@@ -1,6 +1,9 @@
 import dataclasses
 from compiler.ir import *
+from compiler.ir_generator import IRFunction
 from compiler.intrinsics import *
+
+argument_registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"]
 
 
 class Locals:
@@ -46,32 +49,30 @@ def get_all_ir_variables(instructions: list[Instruction]) -> list[IRVar]:
     return result_list
 
 
-def generate_assembly(instructions: list[Instruction]) -> str:
+def generate_function(func: IRFunction) -> str:
     locals = Locals(
-        variables=get_all_ir_variables(instructions)
+        variables=get_all_ir_variables(func.ir)
     )
     lines = [
-        "    .extern print_int",
-        "    .extern print_bool",
-        "    .extern read_int",
-        "    .global main",
-        "    .type main, @function",
-        "    .section .text",
-        "main:",
-        "    pushq %rbp",
-        "    movq %rsp, %rbp",
-        f"    subq ${locals.stack_used()}, %rsp"
+        f".global {func.name}",
+        f".type {func.name}, @function",
+        f"{func.name}:",
+        f"    pushq %rbp",
+        f"    movq %rsp, %rbp",
+        f"    subq ${locals.stack_used()}, %rsp",
     ]
+    func_end_label = f".L{func.name}_end"
 
     def emit(line: str) -> None:
-        if line.startswith(".L"):
+        if line.startswith(".") or line.endswith(":"):
             lines.append(line)
         else:
             lines.append("    " + line)
 
-    # ... Emit initial declarations and stack setup here ...
+    for (i, arg) in enumerate(func.args):
+        emit(f"movq {argument_registers[i]}, {locals.get_ref(arg)}")
 
-    for ins in instructions:
+    for ins in func.ir:
         emit('# ' + str(ins))
         match ins:
             case Label():
@@ -112,15 +113,32 @@ def generate_assembly(instructions: list[Instruction]) -> str:
                     ))
                     pass
                 else:
-                    registers = ["%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"]
                     for (i, arg) in enumerate(ins.args):
-                        emit(f'movq {locals.get_ref(arg)}, {registers[i]}')
+                        emit(
+                            f'movq {locals.get_ref(arg)}, {argument_registers[i]}')
                     if ins.fun.name in ["print_int", "print_bool", "read_int"]:
-                        emit(f'call {ins.fun.name}')
+                        emit(f'callq {ins.fun.name}')
+                    elif ins.fun.name.startswith("V"):
+                        emit(f'callq {locals.get_ref(ins.fun)}')
                     else:
-                        emit(f'call {locals.get_ref(ins.fun)}')
+                        emit(f'callq {ins.fun.name}')
                 emit(f'movq %rax, {locals.get_ref(ins.dest)}')
+            case Return():
+                emit(f"movq {locals.get_ref(ins.value)}, %rax")
+                emit(f"jmp {func_end_label}")
+    emit(f"{func_end_label}:")
     emit("movq %rbp, %rsp")
     emit("popq %rbp")
     emit("ret")
     return "\n".join(lines)
+
+
+def generate_assembly(functions: list[IRFunction]) -> str:
+    start = "\n".join([
+        ".extern print_int",
+        ".extern print_bool",
+        ".extern read_int",
+        ".section .text",
+    ])
+    middle = "\n".join([generate_function(f) for f in functions])
+    return start + "\n" + middle

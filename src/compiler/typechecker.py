@@ -144,7 +144,6 @@ def typecheck_rec(node: Expression, ctx: Context) -> Type:
         case Module():
             new_ctx = Context(False, SymTab(ctx.symtab, dict()), Unit)
             for f in node.functions:
-                ret_val = typecheck_rec(f, new_ctx)
                 if new_ctx.symtab.find(f.name):
                     raise Exception(
                         f"{f.loc}: redefinition of function {f.name}")
@@ -152,6 +151,8 @@ def typecheck_rec(node: Expression, ctx: Context) -> Type:
                     [arg[1] for arg in f.args],
                     f.ret_val
                 )
+            for f in node.functions:
+                ret_val = typecheck_rec(f, new_ctx)
             if len(node.expressions) == 0:
                 return Unit
             for e in node.expressions[:-1]:
@@ -161,8 +162,8 @@ def typecheck_rec(node: Expression, ctx: Context) -> Type:
             return last_value
         case Function():
             new_symtab = SymTab(ctx.symtab, dict())
-            for arg in node.args:
-                new_symtab.symbols[arg[0]] = arg[1]
+            for fun_arg in node.args:
+                new_symtab.symbols[fun_arg[0]] = fun_arg[1]
             new_ctx = Context(True, new_symtab, node.ret_val)
             typecheck_rec(node.block, new_ctx)
             node.type = Unit
