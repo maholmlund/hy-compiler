@@ -109,6 +109,8 @@ def parse(tokens: list[Token]) -> Module:
             result = parse_term()
         elif value.text in ["break", "continue"]:
             result = parse_bc()
+        elif value.text == "return":
+            result = parse_return()
         else:
             raise Exception(f"{value.loc}: expected term")
         if not unary:
@@ -222,16 +224,21 @@ def parse(tokens: list[Token]) -> Module:
             return Bool
         raise Exception(f"{t.loc}: expected valid type")
 
+    def parse_return() -> Return:
+        l = consume("return").loc
+        value = parse_expression()
+        return Return(l, value)
+
     def parse_function() -> Function:
         l = consume("fun").loc
         name = consume().text
-        args: dict[str, Type] = {}
+        args = []
         consume("(")
         while True:
             arg_name = consume().text
             consume(":")
             arg_type = parse_type_keyword()
-            args[arg_name] = arg_type
+            args.append((arg_name, arg_type))
             if peek().text == ")":
                 break
             consume(",")

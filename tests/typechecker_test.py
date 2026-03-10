@@ -73,3 +73,47 @@ b = f(2);
     with pytest.raises(Exception) as exinfo:
         build_ast(c)
     assert "operands" in str(exinfo)
+
+
+def test_basic_function() -> None:
+    c = """
+fun f(x: Int): Int {
+    return x + 2;
+}
+f(2)
+"""
+    target = Module(L, [FunctionCall(L, "f", [Literal(L, 2, type=Int)], type=Int)],
+                    [
+                        Function(L, "f", [("x", Int)], Int, Block(
+                            L,
+                            [
+                                Return(L, BinaryOp(
+                                    L,
+                                    Identifier(L, "x", type=Int),
+                                    "+",
+                                    Literal(L, 2, type=Int),
+                                    type=Int
+                                ), type=Unit),
+                                Literal(L, None, type=Unit),
+                            ],
+                            type=Unit
+                        ), type=Unit)
+    ],
+        type=Int
+    )
+    assert build_ast(c) == target
+
+
+def test_wrong_return_type() -> None:
+    c = """
+fun f(x: Int): Bool {
+    var a = 4;
+    while true do {
+        return a + 2;
+    }
+}
+f(2)
+"""
+    with pytest.raises(Exception) as exinfo:
+        build_ast(c)
+    assert "return" in str(exinfo)

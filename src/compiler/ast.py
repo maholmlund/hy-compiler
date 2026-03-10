@@ -53,7 +53,13 @@ class Expression:
                 return f"Break(type: {self.type})"
             case Continue():
                 return f"Continue(type: {self.type})"
-        return ""
+            case Module():
+                return f"Module(type: {self.type}, expressions: [{', '.join(str(e) for e in self.expressions)}], functions: [{', '.join(str(e) for e in self.functions)}])"
+            case Function():
+                return f"Function(type: {self.type}, name: {self.name}, ret_val: {self.ret_val}, args: [{', '.join(str(e) for e in self.args)}], block: {self.block})"
+            case Return():
+                return f"Return(type: {self.type}, value: {self.value})"
+        raise Exception("not implemented")
 
 
 @dataclass
@@ -123,9 +129,14 @@ class Continue(Expression):
 @dataclass
 class Function(Expression):
     name: str
-    args: dict[str, Type]
+    args: list[tuple[str, Type]]
     ret_val: Type
     block: Block
+
+
+@dataclass
+class Return(Expression):
+    value: Expression
 
 
 @dataclass

@@ -30,7 +30,7 @@ regexes = [
 ]
 
 keywords = ["if", "then", "else", "while", "var",
-            "do", "Int", "Bool", "Unit", "break", "continue", "fun"]
+            "do", "Int", "Bool", "Unit", "break", "continue", "fun", "return"]
 
 
 def tokenize(source_code: str) -> list[Token]:
