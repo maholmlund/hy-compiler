@@ -33,10 +33,10 @@ something"""
 
 def test_locations() -> None:
     assert tokenize(sample4) == [
-        Token(Loc(0, 0), "keyword", "if"),
-        Token(Loc(1, 0), "int_literal", "32"),
-        Token(Loc(1, 3), "int_literal", "43"),
-        Token(Loc(3, 0), "identifier", "something")
+        Token(Loc(1, 1), "keyword", "if"),
+        Token(Loc(2, 1), "int_literal", "32"),
+        Token(Loc(2, 4), "int_literal", "43"),
+        Token(Loc(4, 1), "identifier", "something")
     ]
 
 
@@ -102,17 +102,17 @@ while
 
 def test_all() -> None:
     assert tokenize(sample8) == [
-        Token(Loc(1, 0), "keyword", "if"),
-        Token(Loc(1, 3), "int_literal", "2"),
-        Token(Loc(1, 5), "punctuation", "("),
-        Token(Loc(3, 0), "punctuation", ")"),
-        Token(Loc(3, 2), "keyword", "while"),
-        Token(Loc(3, 8), "keyword", "while"),
-        Token(Loc(3, 23), "keyword", "while"),
-        Token(Loc(4, 0), "punctuation", ";"),
-        Token(Loc(4, 1), "keyword", "if"),
-        Token(Loc(4, 3), "punctuation", ","),
-        Token(Loc(4, 4), "punctuation", ","),
-        Token(Loc(4, 6), "int_literal", "8"),
-        Token(Loc(4, 7), "punctuation", ","),
+        Token(Loc(2, 1), "keyword", "if"),
+        Token(Loc(2, 4), "int_literal", "2"),
+        Token(Loc(2, 6), "punctuation", "("),
+        Token(Loc(4, 1), "punctuation", ")"),
+        Token(Loc(4, 3), "keyword", "while"),
+        Token(Loc(4, 9), "keyword", "while"),
+        Token(Loc(4, 24), "keyword", "while"),
+        Token(Loc(5, 1), "punctuation", ";"),
+        Token(Loc(5, 2), "keyword", "if"),
+        Token(Loc(5, 4), "punctuation", ","),
+        Token(Loc(5, 5), "punctuation", ","),
+        Token(Loc(5, 7), "int_literal", "8"),
+        Token(Loc(5, 8), "punctuation", ","),
     ]

@@ -35,7 +35,7 @@ keywords = ["if", "then", "else", "while", "var",
 
 def tokenize(source_code: str) -> list[Token]:
     result: list[Token] = []
-    line = 0
+    line = 1
     line_start = 0
     matcher = '|'.join(f"(?P<{p[0]}>{p[1]})" for p in regexes)
     for match in re.finditer(matcher, source_code):
@@ -59,12 +59,12 @@ def tokenize(source_code: str) -> list[Token]:
                 if match.group() in keywords:
                     match_type = "keyword"
                 result.append(Token(
-                    Loc(line, match.start() - line_start),
+                    Loc(line, match.start() - line_start + 1),
                     match_type,
                     match.group()))
             case _:
                 result.append(Token(
-                    Loc(line, match.start() - line_start),
+                    Loc(line, match.start() - line_start + 1),
                     match_type,
                     match.group()))
     return result
