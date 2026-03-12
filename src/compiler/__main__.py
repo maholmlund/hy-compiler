@@ -15,25 +15,22 @@ from compiler.assembler import assemble_and_get_executable
 
 
 def call_compiler(source_code: str, input_file_name: str) -> bytes:
-    # *** TODO ***
-    # Call your compiler here and return the compiled executable.
-    # Raise an exception on compilation error.
-    #
-    # The input file name is informational only: you can optionally include in your source locations and error messages,
-    # or you can ignore it.
-    # *** TODO ***
-    tokens = tokenize(source_code)
-    ast = parse(tokens)
-    typecheck(ast)
-    ir = generate_ir(ast)
-    asm = generate_assembly(ir)
-    print("*** ASM start ***")
-    print(asm)
-    print("*** ASM end ***")
-    return assemble_and_get_executable(
-        assembly_code=asm,
-        workdir=None,
-    )
+    try:
+        tokens = tokenize(source_code)
+        ast = parse(tokens)
+        typecheck(ast)
+        ir = generate_ir(ast)
+        asm = generate_assembly(ir)
+        print("*** ASM start ***")
+        print(asm)
+        print("*** ASM end ***")
+        return assemble_and_get_executable(
+            assembly_code=asm,
+            workdir=None,
+        )
+    except Exception as e:
+        print(f"ERROR: {e}")
+        raise Exception("OOF!")
 
 
 def main() -> int:
